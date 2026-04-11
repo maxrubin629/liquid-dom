@@ -183,7 +183,7 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
     gradient.y * edgeMask * 0.5 + 0.5,
     edgeMask
   );
-  let normalDebug = vec3f(normal.xy * 0.5 + vec2f(0.5), normalEdgeMask);
+  let normalDebug = normal * 0.5 + vec3f(0.5);
 
   let frostMix = mix(0.18, 0.56, interiorMask);
   var glass = mix(refracted, blurred, frostMix);
