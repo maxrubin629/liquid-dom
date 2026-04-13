@@ -537,25 +537,25 @@ function createDefaultControls(): RenderControls {
     debugView: 'final',
     shapes: [
       {
-        centerX: 0.685,
-        centerY: 0.515,
-        halfWidth: 0.095,
-        halfHeight: 0.205,
-        radius: 0.07,
+        centerX: 1597.42,
+        centerY: 594.83,
+        halfWidth: 221.54,
+        halfHeight: 236.78,
+        radius: 80.85,
       },
       {
-        centerX: 0.14,
-        centerY: 0.19,
-        halfWidth: 0.105,
-        halfHeight: 0.05,
-        radius: 0.04,
+        centerX: 326.48,
+        centerY: 219.45,
+        halfWidth: 244.86,
+        halfHeight: 57.75,
+        radius: 46.2,
       },
       {
-        centerX: 0.37,
-        centerY: 0.72,
-        halfWidth: 0.12,
-        halfHeight: 0.07,
-        radius: 0.07,
+        centerX: 862.84,
+        centerY: 831.6,
+        halfWidth: 279.84,
+        halfHeight: 80.85,
+        radius: 80.85,
       },
     ],
   }
@@ -592,8 +592,7 @@ function resolveLightDirection(
 function writeShapes(
   device: GPUDevice,
   buffer: GPUBuffer,
-  width: number,
-  height: number,
+  dpr: number,
   elapsedSeconds: number,
   controls: RenderControls,
 ) {
@@ -601,32 +600,31 @@ function writeShapes(
   const wave = easeInOutSine((Math.sin(elapsedSeconds * 0.55) + 1) * 0.5) * motion
   const sway = Math.sin(elapsedSeconds * 0.4) * motion
   const drift = Math.cos(elapsedSeconds * 0.9) * motion
-  const minDimension = Math.min(width, height)
   const [shapeA, shapeB, shapeC] = controls.shapes
 
   const shapes: ShapeRecord[] = [
     {
-      centerX: width * shapeA.centerX,
-      centerY: height * (shapeA.centerY + sway * 0.012),
-      halfWidth: width * (shapeA.halfWidth + 0.02 * wave),
-      halfHeight: height * (shapeA.halfHeight + 0.015 * (1 - wave)),
-      radius: minDimension * shapeA.radius,
+      centerX: shapeA.centerX * dpr,
+      centerY: (shapeA.centerY + sway * 13.86) * dpr,
+      halfWidth: (shapeA.halfWidth + 46.64 * wave) * dpr,
+      halfHeight: (shapeA.halfHeight + 17.325 * (1 - wave)) * dpr,
+      radius: shapeA.radius * dpr,
       active: 1,
     },
     {
-      centerX: width * (shapeB.centerX + wave * 0.08),
-      centerY: height * (shapeB.centerY + drift * 0.02),
-      halfWidth: width * (shapeB.halfWidth + 0.012 * (1 - wave)),
-      halfHeight: height * (shapeB.halfHeight + 0.028 * wave),
-      radius: minDimension * shapeB.radius,
+      centerX: (shapeB.centerX + wave * 186.56) * dpr,
+      centerY: (shapeB.centerY + drift * 23.1) * dpr,
+      halfWidth: (shapeB.halfWidth + 27.984 * (1 - wave)) * dpr,
+      halfHeight: (shapeB.halfHeight + 32.34 * wave) * dpr,
+      radius: shapeB.radius * dpr,
       active: 1,
     },
     {
-      centerX: width * shapeC.centerX,
-      centerY: height * shapeC.centerY,
-      halfWidth: width * (shapeC.halfWidth + 0.018 * motion * Math.sin(elapsedSeconds * 0.48 + 0.8)),
-      halfHeight: height * shapeC.halfHeight,
-      radius: minDimension * shapeC.radius,
+      centerX: shapeC.centerX * dpr,
+      centerY: shapeC.centerY * dpr,
+      halfWidth: (shapeC.halfWidth + 41.976 * motion * Math.sin(elapsedSeconds * 0.48 + 0.8)) * dpr,
+      halfHeight: shapeC.halfHeight * dpr,
+      radius: shapeC.radius * dpr,
       active: 1,
     },
   ]
@@ -906,7 +904,7 @@ export function GlassCanvas() {
         const currentControls = controlsRef.current
         const resolvedLight = resolveLightDirection(currentControls, pointerRef.current)
         resizeCanvas()
-        writeShapes(device, shapesBuffer, targetCanvas.width, targetCanvas.height, elapsedSeconds, currentControls)
+        writeShapes(device, shapesBuffer, currentDpr, elapsedSeconds, currentControls)
         const displacementProfileIndex =
           currentControls.displacementProfile === 'convexSquircle'
             ? 0
@@ -1476,46 +1474,46 @@ export function GlassCanvas() {
             {renderSlider({
               label: 'Center X',
               value: shape.centerX,
-              min: 0.05,
-              max: 0.95,
-              step: 0.005,
-              precision: 3,
+              min: 0,
+              max: 3000,
+              step: 1,
+              precision: 0,
               onChange: (value) => updateShape(index, 'centerX', value),
             })}
             {renderSlider({
               label: 'Center Y',
               value: shape.centerY,
-              min: 0.05,
-              max: 0.95,
-              step: 0.005,
-              precision: 3,
+              min: 0,
+              max: 2000,
+              step: 1,
+              precision: 0,
               onChange: (value) => updateShape(index, 'centerY', value),
             })}
             {renderSlider({
               label: 'Half width',
               value: shape.halfWidth,
-              min: 0.04,
-              max: 0.32,
-              step: 0.005,
-              precision: 3,
+              min: 10,
+              max: 1500,
+              step: 1,
+              precision: 0,
               onChange: (value) => updateShape(index, 'halfWidth', value),
             })}
             {renderSlider({
               label: 'Half height',
               value: shape.halfHeight,
-              min: 0.04,
-              max: 0.32,
-              step: 0.005,
-              precision: 3,
+              min: 10,
+              max: 1000,
+              step: 1,
+              precision: 0,
               onChange: (value) => updateShape(index, 'halfHeight', value),
             })}
             {renderSlider({
               label: 'Corner radius',
               value: shape.radius,
-              min: 0.02,
-              max: 0.22,
-              step: 0.005,
-              precision: 3,
+              min: 1,
+              max: 1000,
+              step: 1,
+              precision: 0,
               onChange: (value) => updateShape(index, 'radius', value),
             })}
           </section>
