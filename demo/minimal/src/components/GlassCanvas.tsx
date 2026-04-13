@@ -541,7 +541,7 @@ function createDefaultControls(): RenderControls {
         radius: 0.04,
       },
       {
-        centerX: 0.6,
+        centerX: 0.37,
         centerY: 0.72,
         halfWidth: 0.12,
         halfHeight: 0.07,
