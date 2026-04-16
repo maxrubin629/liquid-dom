@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { HtmlBackground } from './HtmlBackground'
-import { loadStoredState, saveStoredState } from './controlStorage'
+import { hydrateStoredState, loadStoredState, saveStoredState } from './controlStorage'
 
 const MAX_SHAPES = 3
 const GPU_BUFFER_USAGE = {
@@ -1028,6 +1028,28 @@ export function GlassCanvas() {
     }
   }
 
+  async function handleApplySettingsFromClipboard() {
+    try {
+      const payload = await navigator.clipboard.readText()
+      if (!payload.trim()) {
+        setCopyStatus('Clipboard is empty.')
+        return
+      }
+
+      const parsed = JSON.parse(payload)
+      const nextControls = hydrateStoredState(createDefaultControls(), parsed)
+      setControls(nextControls)
+      setCopyStatus('Applied settings JSON from clipboard.')
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        setCopyStatus('Clipboard does not contain valid JSON.')
+        return
+      }
+
+      setCopyStatus('Clipboard read failed.')
+    }
+  }
+
   function handleResetControls() {
     setControls(createDefaultControls())
     setCopyStatus('')
@@ -1187,6 +1209,9 @@ export function GlassCanvas() {
         <div className="glass-stage__toolbar">
           <button type="button" className="glass-stage__button" onClick={handleCopySettings}>
             Copy settings
+          </button>
+          <button type="button" className="glass-stage__button glass-stage__button--ghost" onClick={handleApplySettingsFromClipboard}>
+            Apply clipboard
           </button>
           <button type="button" className="glass-stage__button glass-stage__button--ghost" onClick={handleResetControls}>
             Reset

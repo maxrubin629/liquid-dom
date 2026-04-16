@@ -26,6 +26,10 @@ function mergeWithDefaults<T>(defaults: T, storedValue: unknown): T {
   return (storedValue ?? defaults) as T
 }
 
+export function hydrateStoredState<T>(defaults: T, value: unknown): T {
+  return mergeWithDefaults(defaults, value)
+}
+
 export function loadStoredState<T>(storageKey: string, defaults: T): T {
   if (typeof window === 'undefined') {
     return defaults
@@ -37,7 +41,7 @@ export function loadStoredState<T>(storageKey: string, defaults: T): T {
       return defaults
     }
 
-    return mergeWithDefaults(defaults, JSON.parse(storedValue))
+    return hydrateStoredState(defaults, JSON.parse(storedValue))
   } catch {
     return defaults
   }
