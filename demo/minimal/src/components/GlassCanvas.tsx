@@ -86,13 +86,12 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
 
 const GLASS_SHADER = /* wgsl */ `
 struct Globals {
-  viewport: vec4f,
-  controls: vec4f,
-  pointer: vec4f,
-  light: vec4f,
-  specular: vec4f,
-  rim: vec4f,
-  displacement: vec4f,
+  canvas: vec4f,
+  surface: vec4f,
+  glass: vec4f,
+  lighting: vec4f,
+  specularPrimary: vec4f,
+  specularSecondary: vec4f,
   profile: vec4f,
 };
 
@@ -134,7 +133,7 @@ fn circularLength(v: vec2f) -> f32 {
 fn sdRoundRect(p: vec2f, halfSize: vec2f, radius: f32) -> f32 {
   let cornerLimit = min(halfSize.x, halfSize.y);
   let clampedRadius = min(radius, cornerLimit);
-  let blendDistance = max(globals.controls.z, 0.0001);
+  let blendDistance = max(globals.surface.z, 0.0001);
   let circleBlend = clamp((radius - cornerLimit) / blendDistance, 0.0, 1.0);
   let q = abs(p) - halfSize + vec2f(clampedRadius);
   let cornerDistance = mix(squircleLength(max(q, vec2f(0.0))), circularLength(max(q, vec2f(0.0))), circleBlend);
@@ -157,7 +156,7 @@ fn sceneSdf(pos: vec2f) -> f32 {
       distance = shapeDistance;
       found = true;
     } else {
-      distance = smin(distance, shapeDistance, globals.controls.x);
+      distance = smin(distance, shapeDistance, globals.surface.x);
     }
   }
 
@@ -249,7 +248,7 @@ fn vertexMain(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
 
 @fragment
 fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
-  let fragCoord = in.uv * globals.viewport.xy;
+  let fragCoord = in.uv * globals.canvas.xy;
   let background = sampleBackgroundSharp(in.uv);
 
   let distance = sceneSdf(fragCoord);
@@ -259,25 +258,25 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
 
   let gradient = sdfGradient(fragCoord);
   let pixelWidth = max(fwidth(distance), 0.75);
-  let rimWidth = max(globals.specular.y, 0.0001);
+  let rimWidth = max(globals.specularPrimary.y, 0.0001);
   let rimBandMask = (1.0 - smoothstep(0.0, pixelWidth, distance)) * (1.0 - smoothstep(rimWidth, rimWidth + pixelWidth, -distance));
   let rimNormal = gradient;
-  let lightDir = normalize(select(vec2f(1.0, 0.0), globals.light.xy, dot(globals.light.xy, globals.light.xy) > 0.0001));
+  let lightDir = normalize(select(vec2f(1.0, 0.0), globals.lighting.xy, dot(globals.lighting.xy, globals.lighting.xy) > 0.0001));
   let mirroredLightDir = -lightDir;
 
-  let bezelWidth = max(globals.displacement.x, pixelWidth * 2.0);
+  let bezelWidth = max(globals.surface.w, pixelWidth * 2.0);
   let inwardDistance = max(-distance, 0.0);
   let bezelProgress = clamp(inwardDistance / bezelWidth, 0.0, 1.0);
   let profileResult = evaluateHeightProfile(globals.profile.x, bezelProgress);
   let profileHeight = profileResult.x * bezelWidth;
   let flatHeight = evaluateHeightProfile(globals.profile.x, 1.0).x * bezelWidth;
-  let baseHeight = globals.displacement.y;
+  let baseHeight = globals.glass.x;
   let surfaceHeight = baseHeight + select(profileHeight, flatHeight, inwardDistance > bezelWidth);
   let surfaceDerivative = select(profileResult.y, 0.0, inwardDistance > bezelWidth);
   let clampedSlope = min(surfaceDerivative, tan(1.4835298));
   let surfaceNormal = normalize(vec3f(gradient * clampedSlope, 1.0));
-  let chromaticAberration = max(globals.profile.y, 0.0);
-  let baseIor = max(globals.displacement.w, 1.0001);
+  let chromaticAberration = max(globals.glass.w, 0.0);
+  let baseIor = max(globals.glass.z, 1.0001);
   let refractedRayRed = refract(
     vec3f(0.0, 0.0, -1.0),
     surfaceNormal,
@@ -291,32 +290,32 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
   );
   let displacementPxRed =
     select(
-      refractedRayRed.xy / max(-refractedRayRed.z, 0.0001) * surfaceHeight * globals.displacement.z,
+      refractedRayRed.xy / max(-refractedRayRed.z, 0.0001) * surfaceHeight * globals.glass.y,
       vec2f(0.0),
       fillMask <= 0.0,
     );
   let displacementPxGreen =
     select(
-      refractedRayGreen.xy / max(-refractedRayGreen.z, 0.0001) * surfaceHeight * globals.displacement.z,
+      refractedRayGreen.xy / max(-refractedRayGreen.z, 0.0001) * surfaceHeight * globals.glass.y,
       vec2f(0.0),
       fillMask <= 0.0,
     );
   let displacementPxBlue =
     select(
-      refractedRayBlue.xy / max(-refractedRayBlue.z, 0.0001) * surfaceHeight * globals.displacement.z,
+      refractedRayBlue.xy / max(-refractedRayBlue.z, 0.0001) * surfaceHeight * globals.glass.y,
       vec2f(0.0),
       fillMask <= 0.0,
     );
   let displacementPx = (displacementPxRed + displacementPxGreen + displacementPxBlue) / 3.0;
-  let refractedUvRed = in.uv + displacementPxRed / globals.viewport.xy;
-  let refractedUvGreen = in.uv + displacementPxGreen / globals.viewport.xy;
-  let refractedUvBlue = in.uv + displacementPxBlue / globals.viewport.xy;
+  let refractedUvRed = in.uv + displacementPxRed / globals.canvas.xy;
+  let refractedUvGreen = in.uv + displacementPxGreen / globals.canvas.xy;
+  let refractedUvBlue = in.uv + displacementPxBlue / globals.canvas.xy;
   let blurred = vec3f(
     sampleBackgroundBlurred(refractedUvRed).r,
     sampleBackgroundBlurred(refractedUvGreen).g,
     sampleBackgroundBlurred(refractedUvBlue).b,
   );
-  let displacementDebugScale = max((globals.displacement.x + globals.displacement.y) * globals.displacement.z * 0.25, 1.0);
+  let displacementDebugScale = max((globals.surface.w + globals.glass.x) * globals.glass.y * 0.25, 1.0);
   let displacementDebug = vec3f(
     displacementPx.x / displacementDebugScale * 0.5 + 0.5,
     displacementPx.y / displacementDebugScale * 0.5 + 0.5,
@@ -324,26 +323,26 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
   );
   let normalDebug = vec3f(rimNormal * 0.5 + vec2f(0.5), 0.5);
 
-  let glassTint = vec3f(globals.rim.z);
+  let glassTint = vec3f(globals.specularSecondary.z);
   let sampledSpecularColor = blurred;
-  let glass = mix(blurred, glassTint, globals.rim.w);
+  let glass = mix(blurred, glassTint, globals.specularSecondary.w);
   let sampledSpecularLuma = dot(sampledSpecularColor, vec3f(0.2126, 0.7152, 0.0722));
   let sampledSpecularBase = vec3f(sampledSpecularLuma);
-  let sampledSpecularTint = mix(sampledSpecularBase, sampledSpecularColor, globals.rim.x);
+  let sampledSpecularTint = mix(sampledSpecularBase, sampledSpecularColor, globals.specularSecondary.x);
 
-  let rimSpecular = pow(max(dot(rimNormal, lightDir), 0.0), globals.specular.z);
-  let mirroredRimSpecular = pow(max(dot(rimNormal, mirroredLightDir), 0.0), globals.specular.z);
-  let specularOpacity = clamp((rimSpecular + mirroredRimSpecular) * globals.specular.x, 0.0, 1.0);
-  let sampledSpecularOpacity = specularOpacity * globals.rim.y;
-  let finalSpecularOpacity = specularOpacity * globals.specular.w;
+  let rimSpecular = pow(max(dot(rimNormal, lightDir), 0.0), globals.specularPrimary.z);
+  let mirroredRimSpecular = pow(max(dot(rimNormal, mirroredLightDir), 0.0), globals.specularPrimary.z);
+  let specularOpacity = clamp((rimSpecular + mirroredRimSpecular) * globals.specularPrimary.x, 0.0, 1.0);
+  let sampledSpecularOpacity = specularOpacity * globals.specularSecondary.y;
+  let finalSpecularOpacity = specularOpacity * globals.specularPrimary.w;
   let sampledBorderLight = sampledSpecularTint * sampledSpecularOpacity * rimBandMask;
   let borderLight = vec3f(1.0) * finalSpecularOpacity * rimBandMask;
 
-  if (globals.light.w > 0.5 && globals.light.w < 1.5) {
+  if (globals.lighting.w > 0.5 && globals.lighting.w < 1.5) {
     return vec4f(displacementDebug, 1.0);
   }
 
-  if (globals.light.w > 1.5) {
+  if (globals.lighting.w > 1.5) {
     return vec4f(normalDebug, 1.0);
   }
 
@@ -354,7 +353,7 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
     color = color + borderLight;
   }
 
-  if (globals.pointer.w > 0.5) {
+  if (globals.lighting.z > 0.5) {
     color = mix(color, vec3f(1.0, 0.24, 0.18), sdfBoundaryMask);
   }
 
@@ -629,7 +628,7 @@ export function GlassCanvas() {
 
       const presentationFormat = gpuNavigator.gpu.getPreferredCanvasFormat()
       const globalsBuffer = device.createBuffer({
-        size: 32 * 4,
+        size: 28 * 4,
         usage: GPU_BUFFER_USAGE.UNIFORM | GPU_BUFFER_USAGE.COPY_DST,
       })
 
@@ -687,7 +686,7 @@ export function GlassCanvas() {
         },
       })
 
-      const globals = new Float32Array(32)
+      const globals = new Float32Array(28)
       const blurHorizontalParams = new Float32Array(4)
       const blurVerticalParams = new Float32Array(4)
       let currentDpr = 1
@@ -794,8 +793,8 @@ export function GlassCanvas() {
 
         globals[0] = nextWidth
         globals[1] = nextHeight
-        globals[2] = nextWidth
-        globals[3] = nextHeight
+        globals[2] = pointerRef.current.x
+        globals[3] = pointerRef.current.y
       }
 
       targetCanvas.onpaint = () => {
@@ -819,18 +818,18 @@ export function GlassCanvas() {
               : 2
 
         globals[4] = currentControls.unionSoftness
-        globals[5] = currentControls.blur
+        globals[5] = currentControls.blur * currentDpr
         globals[6] = currentControls.cornerBlendDistance * currentDpr
-        globals[7] = 0
+        globals[7] = currentControls.bezelWidth * currentDpr
 
-        globals[8] = pointerRef.current.x
-        globals[9] = pointerRef.current.y
-        globals[10] = 0
-        globals[11] = currentControls.showSdfBoundary ? 1 : 0
+        globals[8] = currentControls.glassThickness
+        globals[9] = currentControls.displacementScale
+        globals[10] = currentControls.glassRefractiveIndex
+        globals[11] = currentControls.chromaticAberration
 
         globals[12] = resolvedLight.direction.x
         globals[13] = resolvedLight.direction.y
-        globals[14] = 0
+        globals[14] = currentControls.showSdfBoundary ? 1 : 0
         globals[15] =
           currentControls.debugView === 'displacement'
             ? 1
@@ -848,15 +847,10 @@ export function GlassCanvas() {
         globals[22] = currentControls.glassTintBrightness
         globals[23] = currentControls.glassTintOpacity
 
-        globals[24] = currentControls.bezelWidth * currentDpr
-        globals[25] = currentControls.glassThickness
-        globals[26] = currentControls.displacementScale
-        globals[27] = currentControls.glassRefractiveIndex
-
-        globals[28] = displacementProfileIndex
-        globals[29] = currentControls.chromaticAberration
-        globals[30] = 0
-        globals[31] = 0
+        globals[24] = displacementProfileIndex
+        globals[25] = 0
+        globals[26] = 0
+        globals[27] = 0
 
         device.queue.writeBuffer(globalsBuffer, 0, globals)
         blurHorizontalParams[0] = 1
