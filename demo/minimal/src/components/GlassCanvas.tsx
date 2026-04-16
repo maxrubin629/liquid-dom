@@ -182,12 +182,12 @@ fn lineMask(value: f32, thickness: f32) -> f32 {
 }
 
 fn sampleBackgroundSharp(uv: vec2f) -> vec3f {
-  let clampedUv = clamp(uv, vec2f(0.0), vec2f(1.0));
+  let clampedUv = vec2f(uv.x, 1.0 - uv.y);
   return textureSampleLevel(backgroundTextureSharp, backgroundSampler, clampedUv, 0.0).rgb;
 }
 
 fn sampleBackgroundBlurred(uv: vec2f) -> vec3f {
-  let clampedUv = clamp(uv, vec2f(0.0), vec2f(1.0));
+  let clampedUv = vec2f(uv.x, 1.0 - uv.y);
   return textureSampleLevel(backgroundTextureBlurred, backgroundSampler, clampedUv, 0.0).rgb;
 }
 
