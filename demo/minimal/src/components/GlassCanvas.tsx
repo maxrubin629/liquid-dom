@@ -328,14 +328,13 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
   let glass = mix(blurred, glassTint, globals.specularSecondary.w);
   let sampledSpecularLuma = dot(sampledSpecularColor, vec3f(0.2126, 0.7152, 0.0722));
   let sampledSpecularBase = vec3f(sampledSpecularLuma);
-  let sampledSpecularTint = mix(sampledSpecularBase, sampledSpecularColor, globals.specularSecondary.x);
+  let sampledSpecularTint = mix(sampledSpecularBase, sampledSpecularColor, 1.0 + globals.specularSecondary.x);
 
   let rimSpecular = pow(max(dot(rimNormal, lightDir), 0.0), globals.specularPrimary.z);
   let mirroredRimSpecular = pow(max(dot(rimNormal, mirroredLightDir), 0.0), globals.specularPrimary.z);
   let specularOpacity = clamp((rimSpecular + mirroredRimSpecular) * globals.specularPrimary.x, 0.0, 1.0);
-  let sampledSpecularOpacity = specularOpacity * globals.specularSecondary.y;
   let finalSpecularOpacity = specularOpacity * globals.specularPrimary.w;
-  let sampledBorderLight = sampledSpecularTint * sampledSpecularOpacity * rimBandMask;
+  let sampledBorderOpacity = specularOpacity * rimBandMask;
   let borderLight = vec3f(1.0) * finalSpecularOpacity * rimBandMask;
 
   if (globals.lighting.w > 0.5 && globals.lighting.w < 1.5) {
@@ -349,7 +348,7 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
   var color = background;
   if (fillMask > 0.0) {
     color = mix(color, glass, fillMask);
-    color = color + sampledBorderLight;
+    color = mix(color, sampledSpecularTint, sampledBorderOpacity);
     color = color + borderLight;
   }
 
@@ -402,7 +401,6 @@ type RenderControls = {
   specularSharpness: number
   specularOpacity: number
   specularColorSaturation: number
-  specularColorOpacity: number
   glassTintBrightness: number
   glassTintOpacity: number
   showSdfBoundary: boolean
@@ -443,7 +441,6 @@ function createDefaultControls(): RenderControls {
     specularSharpness: 2,
     specularOpacity: 0.15,
     specularColorSaturation: 2,
-    specularColorOpacity: 0.3,
     glassTintBrightness: 0.15,
     glassTintOpacity: 0.7,
     showSdfBoundary: false,
@@ -843,7 +840,7 @@ export function GlassCanvas() {
         globals[19] = currentControls.specularOpacity
 
         globals[20] = currentControls.specularColorSaturation
-        globals[21] = currentControls.specularColorOpacity
+        globals[21] = 0
         globals[22] = currentControls.glassTintBrightness
         globals[23] = currentControls.glassTintOpacity
 
@@ -1400,19 +1397,10 @@ export function GlassCanvas() {
             label: 'Color saturation',
             value: controls.specularColorSaturation,
             min: 0,
-            max: 2,
+            max: 5,
             step: 0.01,
             precision: 2,
             onChange: (value) => updateControl('specularColorSaturation', value),
-          })}
-          {renderSlider({
-            label: 'Color opacity',
-            value: controls.specularColorOpacity,
-            min: 0,
-            max: 1,
-            step: 0.01,
-            precision: 2,
-            onChange: (value) => updateControl('specularColorOpacity', value),
           })}
         </section>
 
