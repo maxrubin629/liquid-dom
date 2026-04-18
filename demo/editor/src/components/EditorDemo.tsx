@@ -11,6 +11,36 @@ import {
 } from 'liquid-glass-canvas'
 import { EditorBackdrop } from './EditorBackdrop'
 
+type TintColor = {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function channelToHex(value: number) {
+  return Math.round(clamp(value, 0, 1) * 255)
+    .toString(16)
+    .padStart(2, '0')
+}
+
+function tintToHex(tint: TintColor) {
+  return `#${channelToHex(tint.r)}${channelToHex(tint.g)}${channelToHex(tint.b)}`
+}
+
+function hexToTint(hex: string, alpha: number): TintColor {
+  return {
+    r: Number.parseInt(hex.slice(1, 3), 16) / 255,
+    g: Number.parseInt(hex.slice(3, 5), 16) / 255,
+    b: Number.parseInt(hex.slice(5, 7), 16) / 255,
+    a: alpha,
+  }
+}
+
 const SCENE_ID = 'scene'
 
 type TransformState = {
@@ -53,8 +83,7 @@ type ContainerNode = BaseNode & {
   edgeSaturation: number
   reflectionOffset: number
   reflectionSaturation: number
-  tint: number
-  tintOpacity: number
+  tint: TintColor
   zIndex: number
   children: GlassNode[]
 }
@@ -143,8 +172,7 @@ function createContainerNode(overrides: Partial<ContainerNode> = {}): ContainerN
     edgeSaturation: overrides.edgeSaturation ?? 1.7,
     reflectionOffset: overrides.reflectionOffset ?? 18,
     reflectionSaturation: overrides.reflectionSaturation ?? 0.7,
-    tint: overrides.tint ?? 0.15,
-    tintOpacity: overrides.tintOpacity ?? 0.7,
+    tint: overrides.tint ?? { r: 0.15, g: 0.15, b: 0.15, a: 0.7 },
     zIndex: overrides.zIndex ?? 0,
     children: overrides.children ?? [],
     ...createTransformState(overrides),
@@ -172,7 +200,7 @@ function createDefaultSceneState(): SceneState {
           createContainerNode({
             name: 'Primary container',
             zIndex: 1,
-            tint: 0.18,
+            tint: { r: 0.18, g: 0.18, b: 0.18, a: 0.7 },
             blur: 4,
             lightDirection: -0.8,
             children: [
@@ -205,7 +233,7 @@ function createDefaultSceneState(): SceneState {
                 zIndex: 3,
                 spacing: 22,
                 blur: 6,
-                tint: 0.24,
+                tint: { r: 0.24, g: 0.24, b: 0.24, a: 0.7 },
                 specularStrength: 2.2,
                 edgeSaturation: 2.4,
                 children: [
@@ -230,7 +258,7 @@ function createDefaultSceneState(): SceneState {
         zIndex: 2,
         spacing: 18,
         blur: 2.25,
-        tint: 0.28,
+        tint: { r: 0.28, g: 0.28, b: 0.28, a: 0.7 },
         specularWidth: 0.55,
         reflectionOffset: 28,
         children: [
@@ -403,7 +431,6 @@ function buildRuntimeNode(node: RootNode): Group | Container {
     reflectionOffset: node.reflectionOffset,
     reflectionSaturation: node.reflectionSaturation,
     tint: node.tint,
-    tintOpacity: node.tintOpacity,
     zIndex: node.zIndex,
   })
 
@@ -849,18 +876,23 @@ export function EditorDemo() {
                         updateSelectedNode((node) => ({ ...node, reflectionSaturation: value }))
                       }
                     />
-                    <NumberField
-                      label="Tint"
+                    <ColorField
+                      label="Tint color"
                       value={selectedNode.tint}
-                      step={0.01}
-                      onChange={(value) => updateSelectedNode((node) => ({ ...node, tint: value }))}
+                      onChange={(value) =>
+                        updateSelectedNode((node) =>
+                          node.type === 'container' ? { ...node, tint: hexToTint(value, node.tint.a) } : node,
+                        )
+                      }
                     />
                     <NumberField
-                      label="Tint opacity"
-                      value={selectedNode.tintOpacity}
+                      label="Tint alpha"
+                      value={selectedNode.tint.a}
                       step={0.01}
                       onChange={(value) =>
-                        updateSelectedNode((node) => ({ ...node, tintOpacity: value }))
+                        updateSelectedNode((node) =>
+                          node.type === 'container' ? { ...node, tint: { ...node.tint, a: value } } : node,
+                        )
                       }
                     />
                     <NumberField
@@ -1052,6 +1084,21 @@ function SelectField({ label, value, options, onChange }: SelectFieldProps) {
           </option>
         ))}
       </select>
+    </label>
+  )
+}
+
+type ColorFieldProps = {
+  label: string
+  value: TintColor
+  onChange: (value: string) => void
+}
+
+function ColorField({ label, value, onChange }: ColorFieldProps) {
+  return (
+    <label className="editor-field editor-field--wide">
+      <span>{label}</span>
+      <input type="color" value={tintToHex(value)} onChange={(event) => onChange(event.target.value)} />
     </label>
   )
 }

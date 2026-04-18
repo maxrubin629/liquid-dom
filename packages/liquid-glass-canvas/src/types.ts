@@ -7,6 +7,20 @@ export type Point = {
 }
 
 /**
+ * A non-premultiplied RGBA color with normalized channel values.
+ */
+export type RgbaColor = {
+  /** Red channel in the range `0..1`. */
+  r: number
+  /** Green channel in the range `0..1`. */
+  g: number
+  /** Blue channel in the range `0..1`. */
+  b: number
+  /** Alpha channel in the range `0..1`. */
+  a: number
+}
+
+/**
  * A local transform in the same coordinate space as normal HTML layout.
  */
 export interface Transform {

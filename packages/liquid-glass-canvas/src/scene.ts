@@ -1,5 +1,5 @@
 import { composeTransform, identityMatrix, multiplyMatrices, type Matrix2D } from './matrix'
-import type { Point, SurfaceProfile, Transform } from './types'
+import type { Point, RgbaColor, SurfaceProfile, Transform } from './types'
 
 /**
  * Constructor options for a {@link Glass} node.
@@ -31,8 +31,7 @@ export type ContainerInit = Partial<Transform> & {
   edgeSaturation?: number
   reflectionOffset?: number
   reflectionSaturation?: number
-  tint?: number
-  tintOpacity?: number
+  tint?: RgbaColor
   zIndex?: number
 }
 
@@ -58,6 +57,10 @@ function toRadians(value: number) {
 
 function clonePoint(point?: Point): Point {
   return point ? { x: point.x, y: point.y } : { x: 0, y: 0 }
+}
+
+function cloneColor(color?: RgbaColor): RgbaColor {
+  return color ? { r: color.r, g: color.g, b: color.b, a: color.a } : { r: 0, g: 0, b: 0, a: 0 }
 }
 
 function applyTransformDefaults(target: Transform, options: Partial<Transform> | undefined) {
@@ -219,10 +222,8 @@ export class Container implements Transform {
   reflectionOffset = 18
   /** Saturation multiplier for the reflection component. */
   reflectionSaturation = 0.7
-  /** Tint brightness, where lower values darken toward black and higher values brighten toward white. */
-  tint = 0.15
-  /** Opacity of the tint contribution. */
-  tintOpacity = 0.7
+  /** RGBA tint color layered over the refracted glass interior. */
+  tint: RgbaColor = { r: 0.15, g: 0.15, b: 0.15, a: 0.7 }
   /** Draw order among containers; higher values render later. */
   zIndex = 0
 
@@ -284,10 +285,7 @@ export class Container implements Transform {
       this.reflectionSaturation = options.reflectionSaturation
     }
     if (options.tint !== undefined) {
-      this.tint = options.tint
-    }
-    if (options.tintOpacity !== undefined) {
-      this.tintOpacity = options.tintOpacity
+      this.tint = cloneColor(options.tint)
     }
     if (options.zIndex !== undefined) {
       this.zIndex = options.zIndex

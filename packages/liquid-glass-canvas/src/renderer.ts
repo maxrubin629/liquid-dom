@@ -91,7 +91,7 @@ function getSurfaceProfileIndex(profile: SurfaceProfile) {
  * Imperative WebGPU renderer for a liquid-glass scene graph.
  *
  * The renderer owns a canvas and a DOM subtree root that is copied into a GPU
- * texture and used as the backdrop for blur, refraction, reflection, and tint.
+ * texture and used as the backdrop for blur, refraction, reflection, and glass tint.
  */
 export class Renderer {
   /** Scene currently rendered by this renderer. */
@@ -104,7 +104,7 @@ export class Renderer {
   maxDpr: number
 
   private readonly targetCanvas: HTMLCanvasElementWithSubtree
-  private readonly globals = new Float32Array(28)
+  private readonly globals = new Float32Array(32)
   private readonly blurHorizontalParams = new Float32Array(4)
   private readonly blurVerticalParams = new Float32Array(4)
 
@@ -424,13 +424,18 @@ export class Renderer {
 
     this.globals[20] = container.edgeSaturation
     this.globals[21] = container.reflectionOffset * dpr
-    this.globals[22] = container.tint
-    this.globals[23] = container.tintOpacity
+    this.globals[22] = container.reflectionSaturation
+    this.globals[23] = shapeCount
 
-    this.globals[24] = getSurfaceProfileIndex(container.surfaceProfile)
-    this.globals[25] = container.reflectionSaturation
-    this.globals[26] = shapeCount
-    this.globals[27] = 0
+    this.globals[24] = container.tint.r
+    this.globals[25] = container.tint.g
+    this.globals[26] = container.tint.b
+    this.globals[27] = container.tint.a
+
+    this.globals[28] = getSurfaceProfileIndex(container.surfaceProfile)
+    this.globals[29] = 0
+    this.globals[30] = 0
+    this.globals[31] = 0
 
     this.device.queue.writeBuffer(this.globalsBuffer, 0, this.globals)
   }

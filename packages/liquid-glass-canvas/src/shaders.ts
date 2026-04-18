@@ -63,6 +63,7 @@ struct Globals {
   lighting: vec4f,
   specularPrimary: vec4f,
   specularSecondary: vec4f,
+  tint: vec4f,
   profile: vec4f,
 };
 
@@ -113,7 +114,7 @@ fn sdRoundRect(localPos: vec2f, halfSize: vec2f, radius: f32, cornerTransitionSp
 }
 
 fn sceneSdf(pos: vec2f) -> f32 {
-  let shapeCount = u32(globals.profile.z);
+  let shapeCount = u32(globals.specularSecondary.w);
   var distance = 1e5;
   var found = false;
 
@@ -291,14 +292,13 @@ fn fragmentMain(in: VertexOutput) -> @location(0) vec4f {
   // saturation. A second sample is taken farther out along the rim normal to fake reflection.
   let reflectedUv = in.uv + rimNormal * globals.specularSecondary.y / globals.canvas.xy;
   let reflectedColor = sampleBackgroundBlurred(reflectedUv);
-  let glassTint = vec3f(globals.specularSecondary.z);
-  let glass = mix(refractedColor, glassTint, globals.specularSecondary.w);
+  let glass = mix(refractedColor, globals.tint.rgb, globals.tint.a);
   let refractedLuma = dot(refractedColor, vec3f(0.2126, 0.7152, 0.0722));
   let reflectedLuma = dot(reflectedColor, vec3f(0.2126, 0.7152, 0.0722));
   let refractedBase = vec3f(refractedLuma);
   let reflectedBase = vec3f(reflectedLuma);
   let refractedEdgeColor = mix(refractedBase, refractedColor, 1.0 + globals.specularSecondary.x);
-  let reflectedEdgeColor = mix(reflectedBase, reflectedColor, 1.0 + globals.profile.y);
+  let reflectedEdgeColor = mix(reflectedBase, reflectedColor, 1.0 + globals.specularSecondary.z);
 
   // Reflection only shows when the reflected sample is bright enough and the refracted sample
   // underneath is dark enough to accept it.

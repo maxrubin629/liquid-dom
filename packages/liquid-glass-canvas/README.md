@@ -28,6 +28,7 @@ import {
   Renderer,
   Scene,
   type Point,
+  type RgbaColor,
   type SurfaceProfile,
   type Transform,
 } from 'liquid-glass-canvas'
@@ -124,7 +125,7 @@ The public API uses the same coordinate system as normal HTML/CSS layout:
 
 `htmlRoot` is appended as an immediate child of the canvas. You do not create it yourself. Instead, append your own DOM content inside `renderer.htmlRoot`.
 
-That DOM subtree is copied into a GPU texture during the canvas `paint` event and becomes the source backdrop for blur, refraction, reflection, and tint.
+That DOM subtree is copied into a GPU texture during the canvas `paint` event and becomes the source backdrop for blur, refraction, reflection, and glass tint.
 
 The renderer does not start its own render loop. You are responsible for calling `render()`.
 
@@ -241,8 +242,7 @@ new Container(options?: Partial<Transform> & {
   edgeSaturation?: number
   reflectionOffset?: number
   reflectionSaturation?: number
-  tint?: number
-  tintOpacity?: number
+  tint?: RgbaColor
   zIndex?: number
 })
 ```
@@ -291,9 +291,7 @@ Rendering properties:
 - `reflectionSaturation`
   - saturation boost for the reflection sample
 - `tint`
-  - grayscale glass tint, where `0` is black and `1` is white
-- `tintOpacity`
-  - blend amount between refracted backdrop and tint
+  - RGBA color layered over the refracted glass interior
 - `zIndex`
   - draw order between containers
 
@@ -315,8 +313,7 @@ Defaults:
 - `edgeSaturation = 1.7`
 - `reflectionOffset = 18`
 - `reflectionSaturation = 0.7`
-- `tint = 0.15`
-- `tintOpacity = 0.7`
+- `tint = { r: 0.15, g: 0.15, b: 0.15, a: 0.7 }`
 - `zIndex = 0`
 
 Methods:

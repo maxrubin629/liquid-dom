@@ -12,6 +12,32 @@ function degreesToRadians(value: number) {
   return (value * Math.PI) / 180
 }
 
+type TintColor = {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+function channelToHex(value: number) {
+  return Math.round(clamp(value, 0, 1) * 255)
+    .toString(16)
+    .padStart(2, '0')
+}
+
+function tintToHex(tint: TintColor) {
+  return `#${channelToHex(tint.r)}${channelToHex(tint.g)}${channelToHex(tint.b)}`
+}
+
+function hexToTint(hex: string, alpha: number): TintColor {
+  return {
+    r: Number.parseInt(hex.slice(1, 3), 16) / 255,
+    g: Number.parseInt(hex.slice(3, 5), 16) / 255,
+    b: Number.parseInt(hex.slice(5, 7), 16) / 255,
+    a: alpha,
+  }
+}
+
 type ShapeSettings = {
   x: number
   y: number
@@ -38,8 +64,7 @@ type RenderControls = {
   edgeSaturation: number
   reflectionOffset: number
   reflectionSaturation: number
-  tint: number
-  tintOpacity: number
+  tint: TintColor
   showLight: boolean
   lightFollowsPointer: boolean
   shapes: ShapeSettings[]
@@ -72,8 +97,7 @@ function createDefaultControls(): RenderControls {
     edgeSaturation: 1.7,
     reflectionOffset: 18,
     reflectionSaturation: 0.7,
-    tint: 0.15,
-    tintOpacity: 0.7,
+    tint: { r: 0.15, g: 0.15, b: 0.15, a: 0.7 },
     showLight: false,
     lightFollowsPointer: false,
     shapes: [
@@ -257,8 +281,7 @@ export function GlassCanvas() {
     container.edgeSaturation = controls.edgeSaturation
     container.reflectionOffset = controls.reflectionOffset
     container.reflectionSaturation = controls.reflectionSaturation
-    container.tint = controls.tint
-    container.tintOpacity = controls.tintOpacity
+    container.tint = { ...controls.tint }
 
     controls.shapes.forEach((shape, index) => {
       const glass = glasses[index]
@@ -272,7 +295,7 @@ export function GlassCanvas() {
   }, [controls, pointerState])
 
   function updateControl<
-    Key extends Exclude<keyof RenderControls, 'shapes' | 'showLight' | 'lightFollowsPointer'>
+    Key extends Exclude<keyof RenderControls, 'shapes' | 'showLight' | 'lightFollowsPointer' | 'tint'>
   >(key: Key, value: RenderControls[Key]) {
     setControls((current) => ({
       ...current,
@@ -294,6 +317,25 @@ export function GlassCanvas() {
           [key]: value,
         }
       }),
+    }))
+    setCopyStatus('')
+  }
+
+  function updateTint(channel: keyof TintColor, value: number) {
+    setControls((current) => ({
+      ...current,
+      tint: {
+        ...current.tint,
+        [channel]: value,
+      },
+    }))
+    setCopyStatus('')
+  }
+
+  function updateTintColor(hex: string) {
+    setControls((current) => ({
+      ...current,
+      tint: hexToTint(hex, current.tint.a),
     }))
     setCopyStatus('')
   }
@@ -395,6 +437,26 @@ export function GlassCanvas() {
           value={value}
           onChange={(event) => onChange(Number(event.target.value))}
         />
+      </label>
+    )
+  }
+
+  function renderColorPicker({
+    label,
+    value,
+    onChange,
+  }: {
+    label: string
+    value: TintColor
+    onChange: (value: string) => void
+  }) {
+    return (
+      <label className="glass-stage__slider">
+        <div className="glass-stage__slider-head">
+          <span>{label}</span>
+          <span>{tintToHex(value).toUpperCase()}</span>
+        </div>
+        <input type="color" value={tintToHex(value)} onChange={(event) => onChange(event.target.value)} />
       </label>
     )
   }
@@ -669,23 +731,19 @@ export function GlassCanvas() {
 
           <section className="glass-stage__group">
             <h3>Glass</h3>
-            {renderSlider({
-              label: 'Tint',
+            {renderColorPicker({
+              label: 'Tint color',
               value: controls.tint,
-              min: 0,
-              max: 1,
-              step: 0.01,
-              precision: 2,
-              onChange: (value) => updateControl('tint', value),
+              onChange: updateTintColor,
             })}
             {renderSlider({
-              label: 'Tint opacity',
-              value: controls.tintOpacity,
+              label: 'Tint alpha',
+              value: controls.tint.a,
               min: 0,
               max: 1,
               step: 0.01,
               precision: 2,
-              onChange: (value) => updateControl('tintOpacity', value),
+              onChange: (value) => updateTint('a', value),
             })}
           </section>
 
