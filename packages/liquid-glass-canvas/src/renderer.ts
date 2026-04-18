@@ -28,8 +28,13 @@ type GPUQueueWithElementCopy = GPUQueue & {
   ) => void
 }
 
+/**
+ * Constructor options for {@link Renderer}.
+ */
 type RendererInit = {
+  /** Scene to render. If omitted, a new empty scene is created. */
   scene?: Scene
+  /** Maximum device pixel ratio used for internal render targets. Defaults to `2`. */
   maxDpr?: number
 }
 
@@ -82,10 +87,20 @@ function getSurfaceProfileIndex(profile: SurfaceProfile) {
   return 2
 }
 
+/**
+ * Imperative WebGPU renderer for a liquid-glass scene graph.
+ *
+ * The renderer owns a canvas and a DOM subtree root that is copied into a GPU
+ * texture and used as the backdrop for blur, refraction, reflection, and tint.
+ */
 export class Renderer {
+  /** Scene currently rendered by this renderer. */
   readonly scene: Scene
+  /** Canvas element that presents the rendered output. */
   readonly canvas: HTMLCanvasElement
+  /** Immediate child of the canvas whose DOM contents are copied into the backdrop texture. */
   readonly htmlRoot: HTMLDivElement
+  /** Maximum device pixel ratio used for internal render targets. */
   maxDpr: number
 
   private readonly targetCanvas: HTMLCanvasElementWithSubtree
@@ -129,6 +144,9 @@ export class Renderer {
     }
   }
 
+  /**
+   * Creates a renderer and begins asynchronous WebGPU initialization immediately.
+   */
   constructor(options: RendererInit = {}) {
     this.scene = options.scene ?? new Scene()
     this.maxDpr = options.maxDpr ?? 2
@@ -152,6 +170,9 @@ export class Renderer {
     })
   }
 
+  /**
+   * Renders one frame if the renderer is initialized and a backdrop snapshot is available.
+   */
   render() {
     if (this.destroyed) {
       return
@@ -169,6 +190,9 @@ export class Renderer {
     this.drawFrame()
   }
 
+  /**
+   * Tears down observers, event listeners, and GPU resources owned by this renderer.
+   */
   destroy() {
     if (this.destroyed) {
       return

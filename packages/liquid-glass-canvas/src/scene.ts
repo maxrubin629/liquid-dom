@@ -1,6 +1,9 @@
 import { composeTransform, identityMatrix, multiplyMatrices, type Matrix2D } from './matrix'
 import type { Point, SurfaceProfile, Transform } from './types'
 
+/**
+ * Constructor options for a {@link Glass} node.
+ */
 export type GlassInit = Partial<Transform> & {
   width?: number
   height?: number
@@ -8,6 +11,9 @@ export type GlassInit = Partial<Transform> & {
   cornerTransitionSpeed?: number
 }
 
+/**
+ * Constructor options for a {@link Container}.
+ */
 export type ContainerInit = Partial<Transform> & {
   spacing?: number
   blur?: number
@@ -30,6 +36,9 @@ export type ContainerInit = Partial<Transform> & {
   zIndex?: number
 }
 
+/**
+ * Constructor options for a {@link Group}.
+ */
 export type GroupInit = Partial<Transform>
 
 type SceneChild = Container | Group
@@ -105,21 +114,37 @@ function ensureNoCycle(parent: Group, child: Group) {
   }
 }
 
+/**
+ * A single rounded glass shape inside a {@link Container}.
+ */
 export class Glass implements Transform {
+  /** Horizontal translation in CSS pixels. */
   x = 0
+  /** Vertical translation in CSS pixels. */
   y = 0
+  /** Horizontal scale factor. */
   scaleX = 1
+  /** Vertical scale factor. */
   scaleY = 1
+  /** Clockwise rotation in radians. */
   rotation = 0
+  /** Local-space transform origin in CSS pixels. */
   origin: Point = { x: 0, y: 0 }
 
+  /** Shape width in CSS pixels. */
   width = 0
+  /** Shape height in CSS pixels. */
   height = 0
+  /** Corner radius in CSS pixels. */
   cornerRadius = 0
+  /** Controls the blend from squircle-like corners toward circular corners. */
   cornerTransitionSpeed = 120
 
   _parent: Container | null = null
 
+  /**
+   * Creates a glass shape descriptor.
+   */
   constructor(options: GlassInit = {}) {
     applyTransformDefaults(this, options)
 
@@ -137,42 +162,76 @@ export class Glass implements Transform {
     }
   }
 
+  /**
+   * Detaches this glass from its parent container, if attached.
+   */
   remove() {
     removeFromParent(this)
   }
 }
 
+/**
+ * A renderable glass layer whose child {@link Glass} nodes blend into a single SDF field.
+ */
 export class Container implements Transform {
+  /** Horizontal translation in CSS pixels. */
   x = 0
+  /** Vertical translation in CSS pixels. */
   y = 0
+  /** Horizontal scale factor. */
   scaleX = 1
+  /** Vertical scale factor. */
   scaleY = 1
+  /** Clockwise rotation in radians. */
   rotation = 0
+  /** Local-space transform origin in CSS pixels. */
   origin: Point = { x: 0, y: 0 }
 
+  /** Fusion distance used when blending neighboring shapes in CSS pixels. */
   spacing = 42.5
+  /** Backdrop blur radius in CSS pixels. */
   blur = 3.75
+  /** Width of the beveled edge in CSS pixels. */
   bezelWidth = 13.75
+  /** Base glass thickness in CSS pixels. */
   thickness = 90
+  /** Scalar applied to the physically-derived displacement amount. */
   displacementFactor = 1
+  /** Refractive index used for the displacement model. */
   ior = 1.5
+  /** Strength of RGB channel separation applied to refraction. */
   dispersion = 0
+  /** Surface profile used for the beveled edge. */
   surfaceProfile: SurfaceProfile = 'convex'
+  /** 2D light direction in radians. */
   lightDirection = toRadians(-52)
+  /** Multiplier applied to the white specular term. */
   specularStrength = 1.4
+  /** Width of the specular band in CSS pixels. */
   specularWidth = 0.3
+  /** Exponent controlling specular falloff. */
   specularSharpness = 2
+  /** Final opacity of the white specular contribution. */
   specularOpacity = 0.15
+  /** Saturation multiplier for the colored edge/refraction component. */
   edgeSaturation = 1.7
+  /** Offset in CSS pixels used when sampling the reflection color. */
   reflectionOffset = 18
+  /** Saturation multiplier for the reflection component. */
   reflectionSaturation = 0.7
+  /** Tint brightness, where lower values darken toward black and higher values brighten toward white. */
   tint = 0.15
+  /** Opacity of the tint contribution. */
   tintOpacity = 0.7
+  /** Draw order among containers; higher values render later. */
   zIndex = 0
 
   _parent: Scene | Group | null = null
   _children: Glass[] = []
 
+  /**
+   * Creates a glass rendering layer with optical properties shared by its child shapes.
+   */
   constructor(options: ContainerInit = {}) {
     applyTransformDefaults(this, options)
 
@@ -235,6 +294,9 @@ export class Container implements Transform {
     }
   }
 
+  /**
+   * Adds a glass shape to this container, reparenting it if needed.
+   */
   add(child: Glass) {
     removeFromParent(child)
     this._children.push(child)
@@ -242,26 +304,45 @@ export class Container implements Transform {
     return child
   }
 
+  /**
+   * Detaches this container from its parent scene or group, if attached.
+   */
   remove() {
     removeFromParent(this)
   }
 }
 
+/**
+ * A transform-only hierarchy node used to organize containers and nested groups.
+ */
 export class Group implements Transform {
+  /** Horizontal translation in CSS pixels. */
   x = 0
+  /** Vertical translation in CSS pixels. */
   y = 0
+  /** Horizontal scale factor. */
   scaleX = 1
+  /** Vertical scale factor. */
   scaleY = 1
+  /** Clockwise rotation in radians. */
   rotation = 0
+  /** Local-space transform origin in CSS pixels. */
   origin: Point = { x: 0, y: 0 }
 
   _parent: Scene | Group | null = null
   _children: GroupChild[] = []
 
+  /**
+   * Creates a transform-only group node.
+   */
   constructor(options: GroupInit = {}) {
     applyTransformDefaults(this, options)
   }
 
+  /**
+   * Adds a container or nested group, reparenting it if needed.
+   * Throws if doing so would create a cycle.
+   */
   add(child: Container | Group) {
     if (child instanceof Group) {
       ensureNoCycle(this, child)
@@ -273,14 +354,24 @@ export class Group implements Transform {
     return child
   }
 
+  /**
+   * Detaches this group from its parent scene or group, if attached.
+   */
   remove() {
     removeFromParent(this)
   }
 }
 
+/**
+ * Root node for a glass scene graph.
+ */
 export class Scene {
   _children: SceneChild[] = []
 
+  /**
+   * Adds a container or group to the scene, reparenting it if needed.
+   * Throws if doing so would create a cycle.
+   */
   add(child: Container | Group) {
     if (child instanceof Group) {
       let current: ParentNode | null = this
@@ -299,6 +390,9 @@ export class Scene {
   }
 }
 
+/**
+ * Flattens the scene hierarchy into renderable containers with composed world transforms.
+ */
 export function flattenContainers(scene: Scene): TraversedContainer[] {
   const result: TraversedContainer[] = []
 
