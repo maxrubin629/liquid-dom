@@ -10,6 +10,7 @@ export type GlassInit = Partial<Transform> & {
   height?: number
   cornerRadius?: number
   cornerTransitionSpeed?: number
+  pointerEvents?: boolean
   zIndex?: number
   content?: HTMLElement | null
 }
@@ -206,7 +207,22 @@ export class Glass extends EventTarget implements Transform {
   cornerRadius = 0
   /** Controls the blend from squircle-like corners toward circular corners. */
   cornerTransitionSpeed = 120
+  private _pointerEvents = false
   private _zIndex = 0
+
+  /** Enables renderer-side glass pointer events when set to `true`. */
+  get pointerEvents() {
+    return this._pointerEvents
+  }
+
+  set pointerEvents(value: boolean) {
+    if (this._pointerEvents === value) {
+      return
+    }
+
+    this._pointerEvents = value
+    notifySceneMutation(this)
+  }
 
   /** Draw order among content hosts used for DOM hit testing. */
   get zIndex() {
@@ -244,6 +260,9 @@ export class Glass extends EventTarget implements Transform {
     }
     if (options.cornerTransitionSpeed !== undefined) {
       this.cornerTransitionSpeed = options.cornerTransitionSpeed
+    }
+    if (options.pointerEvents !== undefined) {
+      this.pointerEvents = options.pointerEvents
     }
     if (options.zIndex !== undefined) {
       this.zIndex = options.zIndex

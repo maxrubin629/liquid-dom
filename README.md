@@ -192,6 +192,7 @@ new Glass(options?: Partial<Transform> & {
   height?: number
   cornerRadius?: number
   cornerTransitionSpeed?: number
+  pointerEvents?: boolean
   zIndex?: number
   content?: HTMLElement | null
 })
@@ -209,6 +210,7 @@ Properties:
 - `height`
 - `cornerRadius`
 - `cornerTransitionSpeed`
+- `pointerEvents`
 - `zIndex`
 - `content`
   - optional DOM element rendered inside the glass
@@ -220,6 +222,8 @@ Behavior notes:
 - `x` and `y` refer to the top-left corner of the local shape bounds
 - `width` and `height` are full dimensions, not half extents
 - `cornerTransitionSpeed` controls the blend from squircle-like corners to circular corners when the radius becomes large relative to the shape size
+- `pointerEvents` defaults to `false`
+- glass pointer events are only dispatched when `pointerEvents` is enabled on that glass
 - `zIndex` affects interaction ordering for glass content hosts and per-glass pointer events within the same container layer
 - `zIndex` does not change container render order, and does not let a glass in a lower container layer receive events above a glass in a higher container layer
 

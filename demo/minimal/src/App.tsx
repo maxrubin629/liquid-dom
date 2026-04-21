@@ -57,6 +57,7 @@ export default function App() {
       width: 240,
       height: 160,
       cornerRadius: 52,
+      pointerEvents: false,
       zIndex: 0,
     })
 
@@ -66,6 +67,7 @@ export default function App() {
       width: 260,
       height: 180,
       cornerRadius: 58,
+      pointerEvents: true,
       zIndex: 1,
     })
 
@@ -89,6 +91,7 @@ export default function App() {
       width: 220,
       height: 132,
       cornerRadius: 42,
+      pointerEvents: true,
       zIndex: 0,
     })
     topContainer.add(topGlass)
@@ -112,6 +115,7 @@ export default function App() {
           <ul>
             <li>Same-container overlap resolves via glass z-index.</li>
             <li>Higher container layers win across containers.</li>
+            <li>The left glass has pointer events disabled and should stay inert.</li>
             <li>Glass events still fire over DOM content hosted inside a glass.</li>
           </ul>
         </section>
@@ -200,7 +204,8 @@ export default function App() {
           <h1>Pointer Event Harness</h1>
           <p className="hero-copy">
             Hover, press, and release on the glass shapes below. The top glass also hosts a native button so
-            you can verify browser DOM interaction and renderer hit testing happen together.
+            you can verify browser DOM interaction and renderer hit testing happen together. The left glass is
+            visually present but should not emit any events.
           </p>
         </div>
         <div className="status-card">

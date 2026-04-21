@@ -1085,7 +1085,7 @@ export class Renderer {
 
       for (let glassOrder = 0; glassOrder < entry.container._children.length; glassOrder += 1) {
         const glass = entry.container._children[glassOrder]
-        if (glass.width <= 0 || glass.height <= 0) {
+        if (!glass.pointerEvents || glass.width <= 0 || glass.height <= 0) {
           continue
         }
 
