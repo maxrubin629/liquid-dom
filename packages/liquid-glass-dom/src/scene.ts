@@ -9,6 +9,7 @@ export type GlassInit = Partial<Transform> & {
   height?: number
   cornerRadius?: number
   cornerTransitionSpeed?: number
+  zIndex?: number
   content?: HTMLElement | null
 }
 
@@ -194,6 +195,21 @@ export class Glass implements Transform {
   cornerRadius = 0
   /** Controls the blend from squircle-like corners toward circular corners. */
   cornerTransitionSpeed = 120
+  private _zIndex = 0
+
+  /** Draw order among content hosts used for DOM hit testing. */
+  get zIndex() {
+    return this._zIndex
+  }
+
+  set zIndex(value: number) {
+    if (this._zIndex === value) {
+      return
+    }
+
+    this._zIndex = value
+    notifySceneMutation(this)
+  }
 
   private _content: HTMLElement | null = null
   _contentVersion = 0
@@ -216,6 +232,9 @@ export class Glass implements Transform {
     }
     if (options.cornerTransitionSpeed !== undefined) {
       this.cornerTransitionSpeed = options.cornerTransitionSpeed
+    }
+    if (options.zIndex !== undefined) {
+      this.zIndex = options.zIndex
     }
     if (options.content !== undefined) {
       this.setContent(options.content)

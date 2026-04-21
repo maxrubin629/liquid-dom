@@ -190,6 +190,7 @@ new Glass(options?: Partial<Transform> & {
   height?: number
   cornerRadius?: number
   cornerTransitionSpeed?: number
+  zIndex?: number
   content?: HTMLElement | null
 })
 ```
@@ -206,6 +207,7 @@ Properties:
 - `height`
 - `cornerRadius`
 - `cornerTransitionSpeed`
+- `zIndex`
 - `content`
   - optional DOM element rendered inside the glass
   - rendered via the experimental html-in-canvas element copy path
@@ -216,6 +218,7 @@ Behavior notes:
 - `x` and `y` refer to the top-left corner of the local shape bounds
 - `width` and `height` are full dimensions, not half extents
 - `cornerTransitionSpeed` controls the blend from squircle-like corners to circular corners when the radius becomes large relative to the shape size
+- `zIndex` only affects DOM hit testing for glass content, not glass rendering order
 
 Methods:
 

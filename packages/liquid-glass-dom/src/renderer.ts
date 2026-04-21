@@ -169,6 +169,10 @@ function transformPoint(matrix: Matrix2D, x: number, y: number) {
   }
 }
 
+function matrixToCssTransform(matrix: Matrix2D) {
+  return `matrix(${matrix.a}, ${matrix.b}, ${matrix.c}, ${matrix.d}, ${matrix.e}, ${matrix.f})`
+}
+
 function createEmptyBounds(): BoundsRect {
   return {
     minX: Number.POSITIVE_INFINITY,
@@ -452,6 +456,7 @@ export class Renderer {
     this.htmlRoot.style.width = '100%'
     this.htmlRoot.style.height = '100%'
     this.htmlRoot.style.overflow = 'hidden'
+    this.htmlRoot.style.zIndex = '0'
     this.targetCanvas.append(this.htmlRoot)
     this.targetCanvas.addEventListener('paint', this.handlePaintEvent as EventListener)
     this.unsubscribeSceneMutations = this.scene._subscribe(this.handleSceneMutation)
@@ -921,7 +926,7 @@ export class Renderer {
     host.style.display = 'block'
     host.style.overflow = 'hidden'
     host.style.contain = 'paint'
-    host.style.pointerEvents = 'none'
+    host.style.transformOrigin = '0 0'
     this.targetCanvas.prepend(host)
     this.glassContentHosts.add(host)
     return host
@@ -984,6 +989,8 @@ export class Renderer {
     let contentChanged = false
 
     for (const entry of containers) {
+      const containerTransform = entry.transform
+
       for (const glass of entry.container._children) {
         const content = glass.content
         if (!content || glass.width <= 0 || glass.height <= 0) {
@@ -1041,8 +1048,25 @@ export class Renderer {
           contentChanged = true
         }
 
+        contentEntry.host.style.transform = matrixToCssTransform(
+          multiplyMatrices(containerTransform, composeTransform(glass)),
+        )
+
         activeEntries.push(contentEntry)
       }
+    }
+
+    const entryOrder = new Map<GlassContentEntry, number>()
+    for (let index = 0; index < activeEntries.length; index += 1) {
+      entryOrder.set(activeEntries[index], index)
+    }
+
+    const sortedInteractionEntries = [...activeEntries].sort(
+      (left, right) =>
+        left.glass.zIndex - right.glass.zIndex || (entryOrder.get(left) ?? 0) - (entryOrder.get(right) ?? 0),
+    )
+    for (let index = 0; index < sortedInteractionEntries.length; index += 1) {
+      sortedInteractionEntries[index].host.style.zIndex = String(index + 1)
     }
 
     for (const glass of this.glassContentEntries.keys()) {

@@ -70,6 +70,7 @@ type GlassNode = BaseNode & {
   height: number
   cornerRadius: number
   cornerTransitionSpeed: number
+  zIndex: number
 }
 
 type ContainerNode = BaseNode & {
@@ -201,6 +202,7 @@ function createGlassNode(overrides: Partial<GlassNode> = {}): GlassNode {
     height: overrides.height ?? 120,
     cornerRadius: overrides.cornerRadius ?? 48,
     cornerTransitionSpeed: overrides.cornerTransitionSpeed ?? 120,
+    zIndex: overrides.zIndex ?? 0,
     ...createTransformState(overrides),
   }
 }
@@ -512,6 +514,7 @@ function buildRuntimeNode(node: RootNode): RuntimeBuildResult {
         origin: child.origin,
         width: child.width,
         height: child.height,
+        zIndex: child.zIndex,
         cornerRadius: child.cornerRadius,
         cornerTransitionSpeed: child.cornerTransitionSpeed,
         content: content.element,
@@ -1036,6 +1039,15 @@ function InspectorControls({
               onChange: (value: number) =>
                 updateSelectedNode((node) => ({ ...node, cornerTransitionSpeed: value })),
             },
+            zIndex: {
+              value: selectedNode.zIndex,
+              step: 1,
+              onChange: (value: number) =>
+                updateSelectedNode((node) => ({
+                  ...node,
+                  zIndex: value,
+                })),
+            }
           },
           { collapsed: false },
         ),
