@@ -16,7 +16,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "watch": "tsup --watch"
   },
   "devDependencies": {
     "@webgpu/types": "^0.1.69",
