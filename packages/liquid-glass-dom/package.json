@@ -11,6 +11,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
+    },
     "./track-element": {
       "types": "./dist/track-element.d.ts",
       "import": "./dist/track-element.js",
@@ -24,8 +29,16 @@
     "build": "tsup",
     "watch": "tsup --watch"
   },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
   "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@webgpu/types": "^0.1.69",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "tsup": "^8.5.0",
     "typescript": "~6.0.2"
   }

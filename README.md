@@ -44,6 +44,17 @@ import {
 } from 'liquid-glass-dom/track-element'
 ```
 
+```ts
+import {
+  Container,
+  Glass,
+  Root,
+  type ContainerProps,
+  type GlassProps,
+  type RootProps,
+} from 'liquid-glass-dom/react'
+```
+
 ## Quick Start
 
 ```ts
@@ -184,6 +195,61 @@ Current v1 limits:
 - all ancestor `Container` and `Group` transforms must be translation-only
 - CSS transforms on the source element are reflected only through the source element’s bounding box
 - scaled or rotated ancestor transforms are unsupported and cause `trackElement()` to throw during setup
+
+## React API
+
+Use `liquid-glass-dom/react` when you want a declarative React layer on top of the imperative renderer.
+
+```tsx
+import * as Glass from 'liquid-glass-dom/react'
+
+export function Example() {
+  return (
+    <Glass.Root
+      className="stage"
+      backdrop={
+        <div className="backdrop">
+          <h1>Backdrop content</h1>
+          <p>This tree is mounted into renderer.htmlRoot.</p>
+        </div>
+      }
+    >
+      <Glass.Container blur={7} spacing={22} bezelWidth={18} thickness={88}>
+        <div className="layout-row">
+          <Glass.Glass className="glass-proxy" style={{ width: 220, height: 160 }}>
+            <div className="glass-card">Glass content lives here.</div>
+          </Glass.Glass>
+
+          <Glass.Glass className="glass-proxy" style={{ width: 180, height: 120 }}>
+            <button type="button">Interactive DOM still works</button>
+          </Glass.Glass>
+        </div>
+      </Glass.Container>
+    </Glass.Root>
+  )
+}
+```
+
+The React layer has three different DOM domains:
+
+- `backdrop` mounts into `renderer.htmlRoot` and is copied into the canvas as backdrop content
+- `Container` children render into an invisible overlay above the canvas and are used only for layout and measurement
+- `Glass` children render into the glass content host inside the canvas
+
+Behavior notes:
+
+- `Root` owns a continuous render loop and calls `renderer.render()` for you
+- `Glass` geometry is driven only by its proxy DOM element in the hidden overlay
+- `Glass` `className` and `style` apply to that proxy DOM element, not to the content rendered inside the glass
+- arbitrary HTML wrappers inside a `Container` work normally for flex, grid, and absolute positioning
+
+Current v1 limits:
+
+- the React layer intentionally does not expose `Container` or `Glass` transform props
+- exact tracking still depends on the same `trackElement()` limits as the imperative API
+- `Container` must be rendered under `Root`
+- `Glass` must be rendered inside a `Container`
+- `Container` and `Glass` are not allowed inside `backdrop` content or inside another glass's content subtree
 
 ## Types
 
