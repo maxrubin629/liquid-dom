@@ -1,11 +1,23 @@
 export {
   LayoutCanvas,
   useFrame,
+  useAnimate,
   useInvalidateFrame,
   useInvalidateLayout,
   useLayoutScene,
   useRenderer,
+  useTimeline,
 } from './canvas'
+export {
+  AnimationManager,
+  AnimationTimeline,
+  spring,
+} from './animation'
+export type {
+  AnimationControls,
+  SpringTransition,
+  TransitionMap,
+} from './animation'
 export {
   Background,
   Frame,
@@ -21,8 +33,11 @@ export {
   ZStack,
 } from './components'
 export type {
+  AnimateFunction,
+  AnimationConfig,
   BackgroundProps,
   BackgroundRef,
+  ComponentTransition,
   FrameCallback,
   FrameLoopMode,
   FrameProps,

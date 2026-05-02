@@ -1,4 +1,4 @@
-import { StrictMode, createRef, type ReactNode, type Ref } from 'react'
+import { StrictMode, createRef, useEffect, type ReactNode, type Ref } from 'react'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -13,7 +13,10 @@ import {
   Overlay,
   VStack,
   ZStack,
+  spring,
+  useAnimate,
   useFrame,
+  useTimeline,
   type GlassRef,
   type FrameRef,
   type HStackRef,
@@ -215,6 +218,124 @@ describe('React layout components', () => {
 
     await view.rerender(renderColumn(24))
     expect(columnRef.current?.spacing).toBe(24)
+  })
+
+  it('animates declarative prop changes on the shared frame loop', async () => {
+    const frameRef = createRef<FrameRef>()
+    const renderFrame = (width: number) => (
+      <LayoutCanvas frameloop="demand" proposal={{ width: 320, height: 200 }}>
+        <ZStack>
+          <Frame
+            ref={frameRef}
+            width={width}
+            height={20}
+            transition={{ width: spring({ stiffness: 300, damping: 30 }) }}
+          >
+            <Html sizing="fill" />
+          </Frame>
+        </ZStack>
+      </LayoutCanvas>
+    )
+
+    const view = await renderReact(renderFrame(100))
+    flushFrame()
+    expect(frameRef.current?.width).toBe(100)
+
+    await view.rerender(renderFrame(200))
+    expect(frameRef.current?.width).toBe(100)
+
+    flushFrame(32)
+    expect(frameRef.current!.width).toBeGreaterThan(100)
+    expect(frameRef.current!.width).toBeLessThan(200)
+    expect(frameCallbacks.size).toBeGreaterThan(0)
+  })
+
+  it('runs imperative animations and timelines through the layout canvas loop', async () => {
+    const firstRef = createRef<FrameRef>()
+    const secondRef = createRef<FrameRef>()
+    const fastSpring = spring({
+      stiffness: 1000,
+      damping: 100,
+      restDelta: 1000,
+      restSpeed: 1000,
+    })
+
+    function TimelineTrigger() {
+      const createTimeline = useTimeline(fastSpring)
+
+      useEffect(() => {
+        if (!firstRef.current || !secondRef.current) {
+          return
+        }
+
+        createTimeline()
+          .to(firstRef.current, { width: 160 })
+          .to(secondRef.current, { height: 80 })
+          .play()
+      }, [createTimeline])
+
+      return null
+    }
+
+    await renderReact(
+      <LayoutCanvas frameloop="demand" proposal={{ width: 320, height: 200 }}>
+        <VStack>
+          <TimelineTrigger />
+          <Frame ref={firstRef} width={80} height={20}>
+            <Html sizing="fill" />
+          </Frame>
+          <Frame ref={secondRef} width={80} height={20}>
+            <Html sizing="fill" />
+          </Frame>
+        </VStack>
+      </LayoutCanvas>,
+    )
+
+    expect(firstRef.current?.width).toBe(80)
+    expect(secondRef.current?.height).toBe(20)
+
+    flushFrame(32)
+    await act(async () => undefined)
+    expect(firstRef.current?.width).toBe(160)
+    expect(secondRef.current?.height).toBe(20)
+
+    flushFrame(48)
+    await act(async () => undefined)
+    expect(secondRef.current?.height).toBe(80)
+  })
+
+  it('exposes useAnimate for direct retained-node animations', async () => {
+    const frameRef = createRef<FrameRef>()
+
+    function AnimateTrigger() {
+      const animate = useAnimate()
+
+      useEffect(() => {
+        animate(frameRef.current, { width: 180 }, spring({
+          stiffness: 1000,
+          damping: 100,
+          restDelta: 1000,
+          restSpeed: 1000,
+        }))
+      }, [animate])
+
+      return null
+    }
+
+    await renderReact(
+      <LayoutCanvas frameloop="demand" proposal={{ width: 320, height: 200 }}>
+        <ZStack>
+          <AnimateTrigger />
+          <Frame ref={frameRef} width={90} height={20}>
+            <Html sizing="fill" />
+          </Frame>
+        </ZStack>
+      </LayoutCanvas>,
+    )
+
+    expect(frameRef.current?.width).toBe(90)
+    flushFrame(32)
+    expect(frameRef.current?.width).toBe(180)
   })
 
   it('mounts Html children into the layout Html element', async () => {

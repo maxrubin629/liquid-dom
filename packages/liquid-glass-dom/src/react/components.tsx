@@ -29,50 +29,42 @@ import type {
   VStackProps,
   ZStackProps,
 } from './types'
+import { useAnimatedProps } from './animatedProps'
 import {
   renderNodeChildren,
   useAttachNode,
   useDecorationSlotRegistrar,
   useExposeRef,
   useNodeParent,
-  useRetainedLayoutEffect,
   useStableNode,
 } from './tree'
 
 /** Horizontal stack layout component. */
-export function HStack({ ref, children, spacing = 0, alignment = 'center' }: HStackProps) {
+export function HStack({ ref, children, spacing = 0, alignment = 'center', transition }: HStackProps) {
   const node = useStableNode(() => new LayoutHStack({ spacing, alignment }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.spacing = spacing
-    node.alignment = alignment
-  }, [node, spacing, alignment])
+  useAnimatedProps(node, { spacing, alignment }, transition)
 
   return renderNodeChildren(useNodeParent(node), children)
 }
 
 /** Vertical stack layout component. */
-export function VStack({ ref, children, spacing = 0, alignment = 'center' }: VStackProps) {
+export function VStack({ ref, children, spacing = 0, alignment = 'center', transition }: VStackProps) {
   const node = useStableNode(() => new LayoutVStack({ spacing, alignment }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.spacing = spacing
-    node.alignment = alignment
-  }, [node, spacing, alignment])
+  useAnimatedProps(node, { spacing, alignment }, transition)
 
   return renderNodeChildren(useNodeParent(node), children)
 }
 
 /** Z-stack layout component. */
-export function ZStack({ ref, children, alignment = 'center' }: ZStackProps) {
+export function ZStack({ ref, children, alignment = 'center', transition }: ZStackProps) {
   const node = useStableNode(() => new LayoutZStack({ alignment }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.alignment = alignment
-  }, [node, alignment])
+  useAnimatedProps(node, { alignment }, transition)
 
   return renderNodeChildren(useNodeParent(node), children)
 }
@@ -90,6 +82,7 @@ export function Frame({
   maxWidth,
   maxHeight,
   alignment = 'center',
+  transition,
 }: FrameProps) {
   const node = useStableNode(() => new LayoutFrame({
     width,
@@ -104,43 +97,39 @@ export function Frame({
   }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.width = width
-    node.height = height
-    node.minWidth = minWidth
-    node.minHeight = minHeight
-    node.idealWidth = idealWidth
-    node.idealHeight = idealHeight
-    node.maxWidth = maxWidth
-    node.maxHeight = maxHeight
-    node.alignment = alignment
-  }, [node, width, height, minWidth, minHeight, idealWidth, idealHeight, maxWidth, maxHeight, alignment])
+  useAnimatedProps(node, {
+    width,
+    height,
+    minWidth,
+    minHeight,
+    idealWidth,
+    idealHeight,
+    maxWidth,
+    maxHeight,
+    alignment,
+  }, transition)
 
   return renderNodeChildren(useNodeParent(node), children)
 }
 
 /** Padding layout component. */
-export function Padding({ ref, children, insets = 0 }: PaddingProps) {
+export function Padding({ ref, children, insets = 0, transition }: PaddingProps) {
   const node = useStableNode(() => new LayoutPadding({ insets }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.insets = insets
-  }, [node, insets])
+  useAnimatedProps(node, { insets }, transition)
 
   return renderNodeChildren(useNodeParent(node), children)
 }
 
 /** Overlay layout component with a dedicated overlay slot prop. */
-export function Overlay({ ref, children, overlay, alignment = 'center' }: OverlayProps) {
+export function Overlay({ ref, children, overlay, alignment = 'center', transition }: OverlayProps) {
   const node = useStableNode(() => new LayoutOverlay({ alignment }))
   const contentParent = useDecorationSlotRegistrar(node, 'content')
   const overlayParent = useDecorationSlotRegistrar(node, 'decoration')
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.alignment = alignment
-  }, [node, alignment])
+  useAnimatedProps(node, { alignment }, transition)
 
   return (
     <>
@@ -151,15 +140,13 @@ export function Overlay({ ref, children, overlay, alignment = 'center' }: Overla
 }
 
 /** Background layout component with a dedicated background slot prop. */
-export function Background({ ref, children, background, alignment = 'center' }: BackgroundProps) {
+export function Background({ ref, children, background, alignment = 'center', transition }: BackgroundProps) {
   const node = useStableNode(() => new LayoutBackground({ alignment }))
   const contentParent = useDecorationSlotRegistrar(node, 'content')
   const backgroundParent = useDecorationSlotRegistrar(node, 'decoration')
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.alignment = alignment
-  }, [node, alignment])
+  useAnimatedProps(node, { alignment }, transition)
 
   return (
     <>
@@ -179,18 +166,19 @@ export function Transform({
   scaleY = 1,
   rotation = 0,
   origin,
+  transition,
 }: TransformProps) {
   const node = useStableNode(() => new LayoutTransform({ x, y, scaleX, scaleY, rotation, origin }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    node.x = x
-    node.y = y
-    node.scaleX = scaleX
-    node.scaleY = scaleY
-    node.rotation = rotation
-    node.origin = origin ?? { x: 0, y: 0 }
-  }, [node, x, y, scaleX, scaleY, rotation, origin])
+  useAnimatedProps(node, {
+    x,
+    y,
+    scaleX,
+    scaleY,
+    rotation,
+    origin: origin ?? { x: 0, y: 0 },
+  }, transition)
 
   return renderNodeChildren(useNodeParent(node), children)
 }
@@ -219,6 +207,7 @@ export function GlassContainer({
   reflectionOffset,
   tint,
   zIndex,
+  transition,
 }: GlassContainerProps) {
   const node = useStableNode(() => new LayoutGlassContainer({
     spacing,
@@ -244,29 +233,7 @@ export function GlassContainer({
   }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    if (spacing !== undefined) node.spacing = spacing
-    if (blur !== undefined) node.blur = blur
-    if (bezelWidth !== undefined) node.bezelWidth = bezelWidth
-    if (thickness !== undefined) node.thickness = thickness
-    if (displacementFactor !== undefined) node.displacementFactor = displacementFactor
-    if (ior !== undefined) node.ior = ior
-    if (contentIor !== undefined) node.contentIor = contentIor
-    if (contentDepth !== undefined) node.contentDepth = contentDepth
-    if (dispersion !== undefined) node.dispersion = dispersion
-    if (surfaceProfile !== undefined) node.surfaceProfile = surfaceProfile
-    if (lightDirection !== undefined) node.lightDirection = lightDirection
-    if (specularStrength !== undefined) node.specularStrength = specularStrength
-    if (specularWidth !== undefined) node.specularWidth = specularWidth
-    if (specularFalloff !== undefined) node.specularFalloff = specularFalloff
-    if (oppositeSpecularStrength !== undefined) node.oppositeSpecularStrength = oppositeSpecularStrength
-    if (specularSharpness !== undefined) node.specularSharpness = specularSharpness
-    if (specularOpacity !== undefined) node.specularOpacity = specularOpacity
-    if (reflectionOffset !== undefined) node.reflectionOffset = reflectionOffset
-    if (tint !== undefined) node.tint = tint
-    if (zIndex !== undefined) node.zIndex = zIndex
-  }, [
-    node,
+  useAnimatedProps(node, {
     spacing,
     blur,
     bezelWidth,
@@ -287,7 +254,7 @@ export function GlassContainer({
     reflectionOffset,
     tint,
     zIndex,
-  ])
+  }, transition, { assignUndefined: false })
 
   return renderNodeChildren(useNodeParent(node), children)
 }
@@ -307,6 +274,7 @@ export function Glass({
   onPointerDown,
   onPointerUp,
   onPointerCancel,
+  transition,
 }: GlassProps) {
   const hasPointerHandler = Boolean(
     onClick ||
@@ -326,12 +294,12 @@ export function Glass({
   }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    if (cornerRadius !== undefined) node.cornerRadius = cornerRadius
-    if (cornerTransitionSpeed !== undefined) node.cornerTransitionSpeed = cornerTransitionSpeed
-    node.pointerEvents = effectivePointerEvents
-    if (zIndex !== undefined) node.zIndex = zIndex
-  }, [node, cornerRadius, cornerTransitionSpeed, effectivePointerEvents, zIndex])
+  useAnimatedProps(node, {
+    cornerRadius,
+    cornerTransitionSpeed,
+    pointerEvents: effectivePointerEvents,
+    zIndex,
+  }, transition, { assignUndefined: false })
 
   useEffect(() => {
     const listeners: Array<[string, GlassPointerHandler | undefined]> = [
@@ -368,6 +336,7 @@ export function Html({
   children,
   zIndex,
   sizing,
+  transition,
 }: HtmlProps) {
   const node = useStableNode(() => new LayoutHtml({
     zIndex,
@@ -376,28 +345,18 @@ export function Html({
   useExposeRef(ref, node)
   useAttachNode(node)
 
-  useRetainedLayoutEffect(() => {
-    node.sizing = sizing
-    if (zIndex !== undefined) {
-      node.zIndex = zIndex
-    }
-  }, [
-    node,
-    zIndex,
-    sizing,
-  ])
+  useAnimatedProps(node, { sizing }, transition)
+  useAnimatedProps(node, { zIndex }, transition, { assignUndefined: false })
 
   return node.element ? createPortal(children, node.element) : null
 }
 
 /** Layout-only spacer component. */
-export function Spacer({ ref, minLength }: SpacerProps) {
+export function Spacer({ ref, minLength, transition }: SpacerProps) {
   const node = useStableNode(() => new LayoutSpacer({ minLength }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  useRetainedLayoutEffect(() => {
-    if (minLength !== undefined) node.minLength = minLength
-  }, [node, minLength])
+  useAnimatedProps(node, { minLength }, transition, { assignUndefined: false })
 
   return null
 }

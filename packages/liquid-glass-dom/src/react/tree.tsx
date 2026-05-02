@@ -164,12 +164,6 @@ export function useAttachNode(node: LayoutUiNode) {
   useLayoutEffect(() => parent.registerChild(node, order), [node, order, parent])
 }
 
-export function useRetainedLayoutEffect(effect: () => void, deps: readonly unknown[]) {
-  useLayoutEffect(() => {
-    effect()
-  }, deps)
-}
-
 export function useNodeParent(node: LayoutUiNode) {
   return useOrderedChildRegistrar(
     useCallback((children) => syncOrderedChildren(node, children), [node]),

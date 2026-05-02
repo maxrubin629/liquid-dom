@@ -1,6 +1,13 @@
 import type { CSSProperties, MutableRefObject, ReactNode, Ref } from 'react'
 import type { GlassPointerEvent } from '../events'
 import type {
+  AnimateFunction,
+  AnimationConfig,
+  AnimationManager,
+  AnimationTimeline,
+  ComponentTransition,
+} from './animation'
+import type {
   Background as LayoutBackground,
   Frame as LayoutFrame,
   Glass as LayoutGlass,
@@ -51,6 +58,7 @@ export type ChildRegistrar = {
 
 export type RootContextValue = {
   layoutScene: LayoutScene
+  animationManager: AnimationManager
   getRenderer: () => Renderer | null
   invalidateLayout: () => void
   invalidateFrame: () => void
@@ -103,6 +111,10 @@ export type ChildrenProp = {
   children?: ReactNode
 }
 
+export type TransitionProp<T extends object = Record<string, unknown>> = {
+  transition?: ComponentTransition<T>
+}
+
 export type LayoutCanvasProps = ChildrenProp & RefProp<LayoutCanvasRef> & {
   className?: string
   style?: CSSProperties
@@ -114,21 +126,21 @@ export type LayoutCanvasProps = ChildrenProp & RefProp<LayoutCanvasRef> & {
   onError?: (error: unknown) => void
 }
 
-export type HStackProps = ChildrenProp & RefProp<HStackRef> & StackOptions
-export type VStackProps = ChildrenProp & RefProp<VStackRef> & StackOptions
-export type ZStackProps = ChildrenProp & RefProp<ZStackRef> & ZStackOptions
-export type FrameProps = ChildrenProp & RefProp<FrameRef> & FrameOptions
-export type PaddingProps = ChildrenProp & RefProp<PaddingRef> & PaddingOptions
-export type OverlayProps = ChildrenProp & RefProp<OverlayRef> & DecorationOptions & {
+export type HStackProps = ChildrenProp & RefProp<HStackRef> & StackOptions & TransitionProp<StackOptions>
+export type VStackProps = ChildrenProp & RefProp<VStackRef> & StackOptions & TransitionProp<StackOptions>
+export type ZStackProps = ChildrenProp & RefProp<ZStackRef> & ZStackOptions & TransitionProp<ZStackOptions>
+export type FrameProps = ChildrenProp & RefProp<FrameRef> & FrameOptions & TransitionProp<FrameOptions>
+export type PaddingProps = ChildrenProp & RefProp<PaddingRef> & PaddingOptions & TransitionProp<PaddingOptions>
+export type OverlayProps = ChildrenProp & RefProp<OverlayRef> & DecorationOptions & TransitionProp<DecorationOptions> & {
   overlay?: ReactNode
 }
-export type BackgroundProps = ChildrenProp & RefProp<BackgroundRef> & DecorationOptions & {
+export type BackgroundProps = ChildrenProp & RefProp<BackgroundRef> & DecorationOptions & TransitionProp<DecorationOptions> & {
   background?: ReactNode
 }
-export type TransformProps = ChildrenProp & RefProp<TransformRef> & TransformOptions
-export type GlassContainerProps = ChildrenProp & RefProp<GlassContainerRef> & GlassContainerOptions
+export type TransformProps = ChildrenProp & RefProp<TransformRef> & TransformOptions & TransitionProp<TransformOptions>
+export type GlassContainerProps = ChildrenProp & RefProp<GlassContainerRef> & GlassContainerOptions & TransitionProp<GlassContainerOptions>
 export type GlassPointerHandler = (event: GlassPointerEvent) => void
-export type GlassProps = ChildrenProp & RefProp<GlassRef> & GlassOptions & {
+export type GlassProps = ChildrenProp & RefProp<GlassRef> & GlassOptions & TransitionProp<GlassOptions> & {
   onClick?: GlassPointerHandler
   onPointerEnter?: GlassPointerHandler
   onPointerLeave?: GlassPointerHandler
@@ -137,5 +149,12 @@ export type GlassProps = ChildrenProp & RefProp<GlassRef> & GlassOptions & {
   onPointerUp?: GlassPointerHandler
   onPointerCancel?: GlassPointerHandler
 }
-export type HtmlProps = ChildrenProp & RefProp<HtmlRef> & Omit<HtmlOptions, 'element'>
-export type SpacerProps = RefProp<SpacerRef> & SpacerOptions
+export type HtmlProps = ChildrenProp & RefProp<HtmlRef> & Omit<HtmlOptions, 'element'> & TransitionProp<Omit<HtmlOptions, 'element'>>
+export type SpacerProps = RefProp<SpacerRef> & SpacerOptions & TransitionProp<SpacerOptions>
+
+export type {
+  AnimateFunction,
+  AnimationConfig,
+  AnimationTimeline,
+  ComponentTransition,
+}

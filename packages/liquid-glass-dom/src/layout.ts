@@ -373,6 +373,7 @@ export class LayoutScene {
     if (child.sceneNode) {
       attachSceneChild(this.scene, child.sceneNode)
     }
+
     this._emitInvalidation({ kind: 'layout', node: child, cause: 'root' })
     return child
   }

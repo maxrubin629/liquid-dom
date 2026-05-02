@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import AnimationDemo from './demos/AnimationDemo'
 import DomMeasurementDemo from './demos/DomMeasurementDemo'
 import HtmlLayersDemo from './demos/HtmlLayersDemo'
 import LayoutSceneDemo from './demos/LayoutSceneDemo'
@@ -49,6 +50,16 @@ export default function App() {
             <button
               type="button"
               role="tab"
+              aria-selected={activeDemo === 'animation'}
+              className={activeDemo === 'animation' ? 'demo-tab active' : 'demo-tab'}
+              onClick={() => setActiveDemo('animation')}
+            >
+              <span>Animation</span>
+              <small>Spring transitions, imperative refs, and timeline playback</small>
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={activeDemo === 'layout'}
               className={activeDemo === 'layout' ? 'demo-tab active' : 'demo-tab'}
               onClick={() => setActiveDemo('layout')}
@@ -86,6 +97,8 @@ export default function App() {
             <SimpleLayoutSceneDemo />
           ) : activeDemo === 'dom-measurement' ? (
             <DomMeasurementDemo />
+          ) : activeDemo === 'animation' ? (
+            <AnimationDemo />
           ) : activeDemo === 'layout' ? (
             <LayoutSceneDemo />
           ) : activeDemo === 'pointer' ? (

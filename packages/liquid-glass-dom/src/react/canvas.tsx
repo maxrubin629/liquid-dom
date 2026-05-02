@@ -11,7 +11,9 @@ import {
 } from 'react'
 import { LayoutScene } from '../layout'
 import { Renderer } from '../renderer'
+import { AnimationManager, AnimationTimeline, type AnimationConfig } from './animation'
 import type {
+  AnimateFunction,
   FrameCallback,
   FrameLoopEntry,
   FrameState,
@@ -67,6 +69,7 @@ export function LayoutCanvas({
   const hostRef = useRef<HTMLDivElement | null>(null)
   const rendererRef = useRef<Renderer | null>(null)
   const layoutScene = useStableNode(() => new LayoutScene())
+  const animationManager = useStableNode(() => new AnimationManager())
   const [ready, setReady] = useState(false)
   const proposalRef = useRef<ProposedSize>({ width: 0, height: 0 })
   const layoutDirtyRef = useRef(true)
@@ -142,6 +145,7 @@ export function LayoutCanvas({
     const entries = [...frameLoopEntriesRef.current]
       .sort((left, right) => left.priority - right.priority || left.order - right.order)
     try {
+      const animationUpdated = animationManager.tick(time - previousTime)
       for (const entry of entries) {
         entry.callbackRef.current(frameState)
       }
@@ -152,7 +156,7 @@ export function LayoutCanvas({
         layoutDirtyRef.current = false
       }
 
-      if (frameLoopModeRef.current === 'always' || frameDirtyRef.current || shouldLayout) {
+      if (frameLoopModeRef.current === 'always' || frameDirtyRef.current || shouldLayout || animationUpdated) {
         renderer.render()
         frameDirtyRef.current = false
       }
@@ -163,7 +167,12 @@ export function LayoutCanvas({
       }
     }
 
-    if (frameLoopModeRef.current === 'always' || frameDirtyRef.current || layoutDirtyRef.current) {
+    if (
+      frameLoopModeRef.current === 'always' ||
+      frameDirtyRef.current ||
+      layoutDirtyRef.current ||
+      animationManager.active
+    ) {
       scheduleFrame()
     }
   }
@@ -173,11 +182,12 @@ export function LayoutCanvas({
   )
   const rootContextValue = useMemo(() => ({
     layoutScene,
+    animationManager,
     getRenderer,
     invalidateLayout,
     invalidateFrame,
     registerFrame,
-  }), [layoutScene, getRenderer, invalidateLayout, invalidateFrame, registerFrame])
+  }), [layoutScene, animationManager, getRenderer, invalidateLayout, invalidateFrame, registerFrame])
 
   useImperativeHandle(ref, () => ({
     layoutScene,
@@ -312,4 +322,24 @@ export function useInvalidateLayout() {
 /** Returns a function that schedules a frame without marking layout dirty. */
 export function useInvalidateFrame() {
   return useRequiredRoot().invalidateFrame
+}
+
+/** Returns an imperative retained-node animation function. */
+export function useAnimate(): AnimateFunction {
+  const root = useRequiredRoot()
+  return useCallback((target, values, transition) => {
+    const controls = root.animationManager.animate(target, values, transition)
+    root.invalidateFrame()
+    return controls
+  }, [root])
+}
+
+/** Returns a factory for imperative animation timelines. */
+export function useTimeline(defaultTransition?: AnimationConfig) {
+  const root = useRequiredRoot()
+  return useCallback(() => new AnimationTimeline(
+    root.animationManager,
+    root.invalidateFrame,
+    defaultTransition,
+  ), [root, defaultTransition])
 }
