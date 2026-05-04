@@ -61,12 +61,11 @@
 }
 
 .demo-tab:hover {
-  transform: translateX(4px);
   border-color: rgba(150, 241, 202, 0.26);
 }
 
 .demo-tab.active {
-  background: linear-gradient(180deg, rgba(150, 241, 202, 0.14), rgba(80, 168, 153, 0.08));
+  background: rgba(150, 241, 202, 0.14);
   border-color: rgba(150, 241, 202, 0.34);
 }
 
