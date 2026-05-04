@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
+import { button, useControls } from 'leva'
 import {
   Frame,
   Glass,
@@ -37,10 +38,31 @@ const CARDS: DemoCard[] = [
 ]
 
 export default function AnimationDemo() {
-  const [spacing, setSpacing] = useState(18)
-  const [cardWidth, setCardWidth] = useState(CARD_WIDTH)
-  const [fan, setFan] = useState(0)
   const [sequence, setSequence] = useState(0)
+  const { spacing, cardWidth, fan } = useControls('Animation', {
+    spacing: {
+      value: 18,
+      min: 4,
+      max: 56,
+      step: 1,
+      label: 'Stack gap',
+    },
+    cardWidth: {
+      value: CARD_WIDTH,
+      min: 108,
+      max: 220,
+      step: 1,
+      label: 'Frame width',
+    },
+    fan: {
+      value: 0,
+      min: -70,
+      max: 70,
+      step: 1,
+      label: 'Fan offset',
+    },
+    'Play timeline': button(() => setSequence((value) => value + 1)),
+  })
 
   return (
     <section className="animation-demo">
@@ -70,42 +92,6 @@ export default function AnimationDemo() {
         </ZStack>
       </LayoutCanvas>
 
-      <aside className="panel animation-controls">
-        <Control
-          id="animation-spacing"
-          label="Stack gap"
-          value={spacing}
-          min={4}
-          max={56}
-          unit="px"
-          onChange={setSpacing}
-        />
-        <Control
-          id="animation-card-width"
-          label="Frame width"
-          value={cardWidth}
-          min={108}
-          max={220}
-          unit="px"
-          onChange={setCardWidth}
-        />
-        <Control
-          id="animation-fan"
-          label="Fan offset"
-          value={fan}
-          min={-70}
-          max={70}
-          unit="px"
-          onChange={setFan}
-        />
-        <button
-          type="button"
-          className="animation-action"
-          onClick={() => setSequence((value) => value + 1)}
-        >
-          Play timeline
-        </button>
-      </aside>
     </section>
   )
 }
@@ -233,33 +219,5 @@ function AnimatedCard({ refNode, card, width, rotation }: AnimatedCardProps) {
         </Frame>
       </Glass>
     </Transform>
-  )
-}
-
-type ControlProps = {
-  id: string
-  label: string
-  value: number
-  min: number
-  max: number
-  unit: string
-  onChange: (value: number) => void
-}
-
-function Control({ id, label, value, min, max, unit, onChange }: ControlProps) {
-  return (
-    <label className="layout-control" htmlFor={id}>
-      <span>{label}</span>
-      <output htmlFor={id}>{value}{unit}</output>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step="1"
-        value={value}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Leva } from 'leva'
 import './App.css'
 import AnimationDemo from './demos/AnimationDemo'
 import DomMeasurementDemo from './demos/DomMeasurementDemo'
@@ -120,6 +121,21 @@ export default function App() {
             <HtmlLayersDemo />
           )}
         </section>
+
+        <aside className="leva-sidebar">
+          <Leva
+            fill
+            flat
+            collapsed={false}
+            oneLineLabels
+            titleBar={false}
+            theme={{
+              colors: {
+                elevation1: 'transparent',
+              }
+            }}
+          />
+        </aside>
       </div>
     </main>
   )

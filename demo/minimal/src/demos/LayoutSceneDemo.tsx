@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { useControls } from 'leva'
 import { Renderer } from 'liquid-glass-dom'
 import {
   Background,
@@ -282,12 +283,57 @@ function buildLayoutScene(): LayoutRefs {
 export default function LayoutSceneDemo() {
   const stageRef = useRef<HTMLDivElement | null>(null)
   const refs = useRef<LayoutRefs | null>(null)
-  const [columnGap, setColumnGap] = useState(INITIAL_COLUMN_GAP)
-  const [rowGap, setRowGap] = useState(INITIAL_ROW_GAP)
-  const [padding, setPadding] = useState(INITIAL_PADDING)
-  const [frameWidth, setFrameWidth] = useState(INITIAL_FRAME_WIDTH)
-  const [frameHeight, setFrameHeight] = useState(INITIAL_FRAME_HEIGHT)
-  const [transformOffset, setTransformOffset] = useState(INITIAL_TRANSFORM_OFFSET)
+  const {
+    columnGap,
+    rowGap,
+    padding,
+    frameWidth,
+    frameHeight,
+    transformOffset,
+  } = useControls('Layout scene', {
+    columnGap: {
+      value: INITIAL_COLUMN_GAP,
+      min: 0,
+      max: 56,
+      step: 1,
+      label: 'VStack gap',
+    },
+    rowGap: {
+      value: INITIAL_ROW_GAP,
+      min: 0,
+      max: 72,
+      step: 1,
+      label: 'HStack gap',
+    },
+    padding: {
+      value: INITIAL_PADDING,
+      min: 0,
+      max: 76,
+      step: 1,
+      label: 'Padding',
+    },
+    frameWidth: {
+      value: INITIAL_FRAME_WIDTH,
+      min: 160,
+      max: 330,
+      step: 1,
+      label: 'Frame width',
+    },
+    frameHeight: {
+      value: INITIAL_FRAME_HEIGHT,
+      min: 110,
+      max: 210,
+      step: 1,
+      label: 'Frame height',
+    },
+    transformOffset: {
+      value: INITIAL_TRANSFORM_OFFSET,
+      min: -18,
+      max: 70,
+      step: 1,
+      label: 'Transform',
+    },
+  })
 
   useEffect(() => {
     const current = refs.current
@@ -350,90 +396,6 @@ export default function LayoutSceneDemo() {
     <section className="layout-demo">
       <div ref={stageRef} className="canvas-shell layout-canvas-shell" />
 
-      <aside className="panel layout-controls">
-        <Control
-          id="layout-column-gap"
-          label="VStack gap"
-          value={columnGap}
-          min={0}
-          max={56}
-          unit="px"
-          onChange={setColumnGap}
-        />
-        <Control
-          id="layout-row-gap"
-          label="HStack gap"
-          value={rowGap}
-          min={0}
-          max={72}
-          unit="px"
-          onChange={setRowGap}
-        />
-        <Control
-          id="layout-padding"
-          label="Padding"
-          value={padding}
-          min={0}
-          max={76}
-          unit="px"
-          onChange={setPadding}
-        />
-        <Control
-          id="layout-frame-width"
-          label="Frame width"
-          value={frameWidth}
-          min={160}
-          max={330}
-          unit="px"
-          onChange={setFrameWidth}
-        />
-        <Control
-          id="layout-frame-height"
-          label="Frame height"
-          value={frameHeight}
-          min={110}
-          max={210}
-          unit="px"
-          onChange={setFrameHeight}
-        />
-        <Control
-          id="layout-transform-offset"
-          label="Transform"
-          value={transformOffset}
-          min={-18}
-          max={70}
-          unit="px"
-          onChange={setTransformOffset}
-        />
-      </aside>
     </section>
-  )
-}
-
-type ControlProps = {
-  id: string
-  label: string
-  value: number
-  min: number
-  max: number
-  unit: string
-  onChange: (value: number) => void
-}
-
-function Control({ id, label, value, min, max, unit, onChange }: ControlProps) {
-  return (
-    <label className="layout-control" htmlFor={id}>
-      <span>{label}</span>
-      <output htmlFor={id}>{value}{unit}</output>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step="1"
-        value={value}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
   )
 }

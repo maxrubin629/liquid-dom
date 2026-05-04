@@ -1,13 +1,20 @@
 .minimal-app {
-  min-height: 100vh;
+  --controls-width: 340px;
+  --demo-window-height: calc(100dvh - 56px);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   color: #f3f5f7;
 }
 
 .app-shell {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr) var(--controls-width);
   gap: 26px;
-  align-items: start;
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .panel {
@@ -18,8 +25,9 @@
 }
 
 .demo-sidebar {
-  position: sticky;
-  top: 24px;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .demo-tabs {
@@ -64,6 +72,24 @@
 
 .demo-content {
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+  scrollbar-gutter: stable;
+}
+
+.leva-sidebar {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: #181c20;
+  scrollbar-gutter: stable;
+}
+
+.leva-sidebar > div {
+  min-height: 100%;
 }
 
 .eyebrow {
@@ -117,22 +143,15 @@
   gap: 18px;
 }
 
-.layout-canvas-shell {
-  height: 560px;
-}
-
 .animation-canvas-shell {
-  height: 560px;
   background: #05070c;
 }
 
 .simple-layout-canvas-shell {
-  height: 560px;
   background: #05070c;
 }
 
 .sdf-overlap-canvas-shell {
-  height: 500px;
   background: #07090d;
 }
 
@@ -155,177 +174,16 @@
 }
 
 .dom-measure-canvas-shell {
-  height: 600px;
   background: #07090e;
 }
 
-.layout-controls {
+.sdf-overlap-file-input {
+  display: none;
+}
+
+.dom-measure-readouts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 16px;
-  align-items: end;
-}
-
-.layout-control {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-
-.layout-control span {
-  font-size: 0.74rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(243, 245, 247, 0.62);
-}
-
-.layout-control output {
-  color: rgba(243, 245, 247, 0.9);
-  font-variant-numeric: tabular-nums;
-}
-
-.layout-control input[type="range"] {
-  width: 100%;
-  accent-color: #96f1ca;
-}
-
-.sdf-overlap-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  align-items: end;
-}
-
-.sdf-overlap-control-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 76px;
-  gap: 12px;
-  align-items: center;
-}
-
-.sdf-overlap-number {
-  min-width: 0;
-  height: 36px;
-  padding: 0 8px;
-  color: rgba(244, 255, 251, 0.92);
-  font-variant-numeric: tabular-nums;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-}
-
-.sdf-overlap-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 36px;
-  color: rgba(244, 255, 251, 0.9);
-}
-
-.sdf-overlap-toggle input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: #96f1ca;
-}
-
-.sdf-overlap-toggle span {
-  overflow-wrap: anywhere;
-}
-
-.sdf-overlap-color-control {
-  grid-column: 1 / -1;
-}
-
-.sdf-overlap-color-row {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 76px;
-  gap: 12px;
-  align-items: center;
-}
-
-.sdf-overlap-color-row input[type="color"] {
-  width: 44px;
-  height: 36px;
-  padding: 2px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.sdf-overlap-image-control {
-  grid-column: 1 / -1;
-}
-
-.sdf-overlap-image-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 76px;
-  gap: 12px;
-  align-items: center;
-}
-
-.sdf-overlap-image-row input[type="file"] {
-  min-width: 0;
-  color: rgba(244, 255, 251, 0.76);
-}
-
-.sdf-overlap-image-row button {
-  height: 36px;
-  color: rgba(244, 255, 251, 0.92);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.sdf-overlap-image-row button:disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-
-.animation-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  align-items: end;
-}
-
-.animation-action {
-  min-height: 44px;
-  padding: 0 16px;
-  color: #f4fffb;
-  font-weight: 800;
-  background: rgba(150, 241, 202, 0.12);
-  border: 1px solid rgba(150, 241, 202, 0.34);
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.animation-action:hover {
-  background: rgba(150, 241, 202, 0.18);
-}
-
-.dom-measure-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  align-items: end;
-}
-
-.dom-measure-action {
-  min-height: 42px;
-  padding: 0 14px;
-  color: #f4fffb;
-  font-weight: 700;
-  background: rgba(150, 241, 202, 0.12);
-  border: 1px solid rgba(150, 241, 202, 0.34);
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.dom-measure-action:hover {
-  background: rgba(150, 241, 202, 0.18);
 }
 
 .dom-measure-layout-count {
@@ -380,34 +238,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.tiny-canvas-shell {
-  height: 500px;
-}
-
-.tiny-controls {
-  display: grid;
-  grid-template-columns: auto minmax(72px, max-content) minmax(220px, 1fr);
-  gap: 16px;
-  align-items: center;
-}
-
-.tiny-controls label {
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(243, 245, 247, 0.64);
-}
-
-.tiny-width-readout {
-  color: rgba(243, 245, 247, 0.88);
-  font-variant-numeric: tabular-nums;
-}
-
-.tiny-controls input[type="range"] {
-  width: 100%;
-  accent-color: #96f1ca;
-}
-
 .tracker-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
@@ -427,12 +257,12 @@
 
 .tracker-stage-shell {
   position: relative;
-  height: 620px;
+  height: var(--demo-window-height);
 }
 
 .canvas-shell {
   position: relative;
-  height: 620px;
+  height: var(--demo-window-height);
   border-radius: 32px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1518,30 +1348,18 @@
     grid-template-columns: 1fr;
   }
 
-  .demo-sidebar {
-    position: static;
+  .app-shell {
+    grid-template-rows: minmax(120px, 0.25fr) minmax(0, 1fr) minmax(220px, 0.45fr);
   }
 
-  .tracker-stage-shell {
-    height: 540px;
+  .demo-tabs {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 
 @media (max-width: 980px) {
   .demo-layout,
   .backdrop-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .layout-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .canvas-shell {
-    height: 540px;
-  }
-
-  .tiny-controls {
     grid-template-columns: 1fr;
   }
 }

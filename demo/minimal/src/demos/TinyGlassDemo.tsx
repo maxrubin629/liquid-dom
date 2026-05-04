@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { useControls } from 'leva'
 import { Container, Glass, Html, Renderer, Scene } from 'liquid-glass-dom'
 
 const INITIAL_GLASS_WIDTH = 320
@@ -10,9 +11,29 @@ export default function TinyGlassDemo() {
   const glassRef = useRef<Glass | null>(null)
   const glassContentRef = useRef<Html | null>(null)
   const sceneHtmlRef = useRef<Html | null>(null)
-  const [glassWidth, setGlassWidth] = useState(INITIAL_GLASS_WIDTH)
-  const [sceneHtmlWidth, setSceneHtmlWidth] = useState(INITIAL_SCENE_HTML_WIDTH)
-  const [sharedHeight, setSharedHeight] = useState(INITIAL_SHARED_HEIGHT)
+  const { glassWidth, sceneHtmlWidth, sharedHeight } = useControls('Tiny glass', {
+    glassWidth: {
+      value: INITIAL_GLASS_WIDTH,
+      min: 220,
+      max: 520,
+      step: 1,
+      label: 'Glass width',
+    },
+    sceneHtmlWidth: {
+      value: INITIAL_SCENE_HTML_WIDTH,
+      min: 180,
+      max: 420,
+      step: 1,
+      label: 'Scene HTML width',
+    },
+    sharedHeight: {
+      value: INITIAL_SHARED_HEIGHT,
+      min: 120,
+      max: 220,
+      step: 1,
+      label: 'Shared height',
+    },
+  })
 
   useEffect(() => {
     const glass = glassRef.current
@@ -156,44 +177,6 @@ export default function TinyGlassDemo() {
   return (
     <section className="tiny-demo">
       <div ref={stageRef} className="canvas-shell tiny-canvas-shell" />
-
-      <aside className="panel tiny-controls">
-        <label htmlFor="tiny-glass-width">Glass width</label>
-        <div className="tiny-width-readout">{glassWidth}px</div>
-        <input
-          id="tiny-glass-width"
-          type="range"
-          min="220"
-          max="520"
-          step="1"
-          value={glassWidth}
-          onChange={(event) => setGlassWidth(Number(event.currentTarget.value))}
-        />
-
-        <label htmlFor="tiny-scene-html-width">Scene HTML width</label>
-        <div className="tiny-width-readout">{sceneHtmlWidth}px</div>
-        <input
-          id="tiny-scene-html-width"
-          type="range"
-          min="180"
-          max="420"
-          step="1"
-          value={sceneHtmlWidth}
-          onChange={(event) => setSceneHtmlWidth(Number(event.currentTarget.value))}
-        />
-
-        <label htmlFor="tiny-shared-height">Shared height</label>
-        <div className="tiny-width-readout">{sharedHeight}px</div>
-        <input
-          id="tiny-shared-height"
-          type="range"
-          min="120"
-          max="220"
-          step="1"
-          value={sharedHeight}
-          onChange={(event) => setSharedHeight(Number(event.currentTarget.value))}
-        />
-      </aside>
     </section>
   )
 }

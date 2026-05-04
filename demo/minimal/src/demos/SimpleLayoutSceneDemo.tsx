@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
+import { useControls } from 'leva'
 import {
   Frame,
   Glass,
@@ -24,11 +25,43 @@ const INITIAL_GRID_Y = 0
 const CARD_ORIGIN = { x: CARD_WIDTH / 2, y: CARD_HEIGHT / 2 }
 
 export default function SimpleLayoutSceneDemo() {
-  const [columnGap, setColumnGap] = useState(INITIAL_COLUMN_SPACING)
-  const [rowGap, setRowGap] = useState(INITIAL_ROW_SPACING)
-  const [rowTransform, setRowTransform] = useState(INITIAL_ROW_TRANSFORM)
-  const [gridX, setGridX] = useState(INITIAL_GRID_X)
-  const [gridY, setGridY] = useState(INITIAL_GRID_Y)
+  const { columnGap, rowGap, rowTransform, gridX, gridY } = useControls('Simple layout', {
+    columnGap: {
+      value: INITIAL_COLUMN_SPACING,
+      min: -50,
+      max: 72,
+      step: 1,
+      label: 'VStack gap',
+    },
+    rowGap: {
+      value: INITIAL_ROW_SPACING,
+      min: 0,
+      max: 88,
+      step: 1,
+      label: 'HStack gap',
+    },
+    rowTransform: {
+      value: INITIAL_ROW_TRANSFORM,
+      min: 0,
+      max: 80,
+      step: 1,
+      label: 'Row transform',
+    },
+    gridX: {
+      value: INITIAL_GRID_X,
+      min: -180,
+      max: 180,
+      step: 1,
+      label: 'Grid X',
+    },
+    gridY: {
+      value: INITIAL_GRID_Y,
+      min: -140,
+      max: 140,
+      step: 1,
+      label: 'Grid Y',
+    },
+  })
 
   return (
     <section className="simple-layout-demo">
@@ -69,53 +102,6 @@ export default function SimpleLayoutSceneDemo() {
         </ZStack>
       </LayoutCanvas>
 
-      <aside className="panel layout-controls">
-        <Control
-          id="simple-layout-column-gap"
-          label="VStack gap"
-          value={columnGap}
-          min={-50}
-          max={72}
-          unit="px"
-          onChange={setColumnGap}
-        />
-        <Control
-          id="simple-layout-row-gap"
-          label="HStack gap"
-          value={rowGap}
-          min={0}
-          max={88}
-          unit="px"
-          onChange={setRowGap}
-        />
-        <Control
-          id="simple-layout-row-transform"
-          label="Row transform"
-          value={rowTransform}
-          min={0}
-          max={80}
-          unit="px"
-          onChange={setRowTransform}
-        />
-        <Control
-          id="simple-layout-grid-x"
-          label="Grid X"
-          value={gridX}
-          min={-180}
-          max={180}
-          unit="px"
-          onChange={setGridX}
-        />
-        <Control
-          id="simple-layout-grid-y"
-          label="Grid Y"
-          value={gridY}
-          min={-140}
-          max={140}
-          unit="px"
-          onChange={setGridY}
-        />
-      </aside>
     </section>
   )
 }
@@ -206,33 +192,5 @@ function GlassCard({ index }: { index: number }) {
         </Frame>
       </Glass>
     </Transform>
-  )
-}
-
-type ControlProps = {
-  id: string
-  label: string
-  value: number
-  min: number
-  max: number
-  unit: string
-  onChange: (value: number) => void
-}
-
-function Control({ id, label, value, min, max, unit, onChange }: ControlProps) {
-  return (
-    <label className="layout-control" htmlFor={id}>
-      <span>{label}</span>
-      <output htmlFor={id}>{value}{unit}</output>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step="1"
-        value={value}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
   )
 }

@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react'
+import { button, useControls } from 'leva'
 import {
   Frame,
   Glass,
@@ -26,13 +27,35 @@ const emptyMetrics: ProbeMetrics = {
 }
 
 export default function DomMeasurementDemo() {
-  const [wrapWidth, setWrapWidth] = useState(230)
-  const [fixedWidth, setFixedWidth] = useState(210)
-  const [textLevel, setTextLevel] = useState(2)
   const [mutationCount, setMutationCount] = useState(1)
   const [replacementVariant, setReplacementVariant] = useState(0)
   const [layoutCount, setLayoutCount] = useState(0)
   const [metrics, setMetrics] = useState<ProbeMetrics>(emptyMetrics)
+  const { wrapWidth, fixedWidth, textLevel } = useControls('DOM measurement', {
+    wrapWidth: {
+      value: 230,
+      min: 150,
+      max: 340,
+      step: 1,
+      label: 'Proposal width',
+    },
+    fixedWidth: {
+      value: 210,
+      min: 140,
+      max: 320,
+      step: 1,
+      label: 'Fixed width',
+    },
+    textLevel: {
+      value: 2,
+      min: 1,
+      max: 5,
+      step: 1,
+      label: 'Text content',
+    },
+    'Mutate DOM content': button(() => setMutationCount((count) => count + 1)),
+    'Replace measured element': button(() => setReplacementVariant((variant) => variant + 1)),
+  })
 
   const handleMetrics = useCallback((nextMetrics: ProbeMetrics) => {
     setMetrics(nextMetrics)
@@ -52,48 +75,7 @@ export default function DomMeasurementDemo() {
         />
       </LayoutCanvas>
 
-      <aside className="panel dom-measure-controls">
-        <RangeControl
-          id="dom-measure-wrap-width"
-          label="Proposal width"
-          value={wrapWidth}
-          min={150}
-          max={340}
-          unit="px"
-          onChange={setWrapWidth}
-        />
-        <RangeControl
-          id="dom-measure-fixed-width"
-          label="Fixed width"
-          value={fixedWidth}
-          min={140}
-          max={320}
-          unit="px"
-          onChange={setFixedWidth}
-        />
-        <RangeControl
-          id="dom-measure-text-level"
-          label="Text content"
-          value={textLevel}
-          min={1}
-          max={5}
-          unit=""
-          onChange={setTextLevel}
-        />
-        <button
-          type="button"
-          className="dom-measure-action"
-          onClick={() => setMutationCount((count) => count + 1)}
-        >
-          Mutate DOM content
-        </button>
-        <button
-          type="button"
-          className="dom-measure-action"
-          onClick={() => setReplacementVariant((variant) => variant + 1)}
-        >
-          Replace measured element
-        </button>
+      <aside className="panel dom-measure-readouts">
         <LayoutCountReadout count={layoutCount} />
         <MeasurementReadout metrics={metrics} />
       </aside>
@@ -359,34 +341,6 @@ function LayoutCountReadout({ count }: { count: number }) {
       <span>Layout calls</span>
       <strong>{count}</strong>
     </div>
-  )
-}
-
-type RangeControlProps = {
-  id: string
-  label: string
-  value: number
-  min: number
-  max: number
-  unit: string
-  onChange: (value: number) => void
-}
-
-function RangeControl({ id, label, value, min, max, unit, onChange }: RangeControlProps) {
-  return (
-    <label className="layout-control" htmlFor={id}>
-      <span>{label}</span>
-      <output htmlFor={id}>{value}{unit}</output>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step="1"
-        value={value}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
-      />
-    </label>
   )
 }
 
