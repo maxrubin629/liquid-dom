@@ -1,6 +1,6 @@
 import type { GlassPointerEvent, GlassPointerEventType } from './events'
 import { composeTransform, identityMatrix, multiplyMatrices, type Matrix2D } from './matrix'
-import type { Point, RgbaColor, SurfaceProfile, Transform } from './types'
+import type { Point, RgbaColor, SpecularWidth, SurfaceProfile, Transform } from './types'
 
 /**
  * Constructor options for a {@link Html} node.
@@ -51,7 +51,7 @@ export type ContainerInit = Partial<Transform> & {
   surfaceProfile?: SurfaceProfile
   lightDirection?: number
   specularStrength?: number
-  specularWidth?: number
+  specularWidth?: SpecularWidth
   specularFalloff?: number
   oppositeSpecularStrength?: number
   specularSharpness?: number
@@ -596,8 +596,8 @@ export class Container implements Transform {
   lightDirection = -Math.PI / 4
   /** Multiplier applied to the white specular term. */
   specularStrength = 1.4
-  /** Width of the specular band in CSS pixels. */
-  specularWidth = 0.3
+  /** Width of the specular band. Numeric values are CSS pixels; `'hairline'` is one device pixel. */
+  specularWidth: SpecularWidth = 'hairline'
   /** Amount by which specular strength falls off from the edge to the end of the band. */
   specularFalloff = 0
   /** Multiplier applied to the opposite-side white specular term. */

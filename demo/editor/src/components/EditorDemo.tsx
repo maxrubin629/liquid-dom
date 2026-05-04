@@ -9,6 +9,7 @@ import {
   Renderer,
   Scene,
   type Point,
+  type SpecularWidth,
   type SurfaceProfile,
 } from 'liquid-glass-dom'
 import {
@@ -87,7 +88,7 @@ type ContainerNode = BaseNode & {
   surfaceProfile: SurfaceProfile
   lightDirection: number
   specularStrength: number
-  specularWidth: number
+  specularWidth: SpecularWidth
   specularFalloff: number
   oppositeSpecularStrength: number
   specularSharpness: number
@@ -155,6 +156,8 @@ const DEFAULT_BACKDROP_SETTINGS: BackdropSettings = {
   },
 }
 
+const DEFAULT_NUMERIC_SPECULAR_WIDTH = 0.3
+
 const SURFACE_PROFILES: Array<{ value: SurfaceProfile; label: string }> = [
   { value: 'convex', label: 'Convex squircle' },
   { value: 'concave', label: 'Concave' },
@@ -218,7 +221,7 @@ function createContainerNode(overrides: Partial<ContainerNode> = {}): ContainerN
     surfaceProfile: overrides.surfaceProfile ?? 'convex',
     lightDirection: overrides.lightDirection ?? -Math.PI / 4,
     specularStrength: overrides.specularStrength ?? 1.4,
-    specularWidth: overrides.specularWidth ?? 0.3,
+    specularWidth: overrides.specularWidth ?? 'hairline',
     specularFalloff: overrides.specularFalloff ?? 0,
     oppositeSpecularStrength: overrides.oppositeSpecularStrength ?? overrides.specularStrength ?? 1.4,
     specularSharpness: overrides.specularSharpness ?? 2,
@@ -770,6 +773,11 @@ function InspectorControls({
       }
 
       if (selectedNode.type === 'container') {
+        const numericSpecularWidth = typeof selectedNode.specularWidth === 'number'
+          ? selectedNode.specularWidth
+          : DEFAULT_NUMERIC_SPECULAR_WIDTH
+        const specularHairline = selectedNode.specularWidth === 'hairline'
+
         return {
           ...baseSchema,
           children: folder(
@@ -850,11 +858,25 @@ function InspectorControls({
                 onChange: (value: number) =>
                   updateSelectedNode((node) => ({ ...node, specularStrength: value })),
               },
+              specularHairline: {
+                value: specularHairline,
+                onChange: (value: boolean) =>
+                  updateSelectedNode((node) => (
+                    node.type === 'container'
+                      ? { ...node, specularWidth: value ? 'hairline' : numericSpecularWidth }
+                      : node
+                  )),
+              },
               specularWidth: {
-                value: selectedNode.specularWidth,
+                value: numericSpecularWidth,
+                disabled: specularHairline,
                 step: 0.05,
                 onChange: (value: number) =>
-                  updateSelectedNode((node) => ({ ...node, specularWidth: value })),
+                  updateSelectedNode((node) => (
+                    node.type === 'container' && node.specularWidth !== 'hairline'
+                      ? { ...node, specularWidth: value }
+                      : node
+                  )),
               },
               specularFalloff: {
                 value: selectedNode.specularFalloff,

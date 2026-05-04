@@ -345,7 +345,7 @@ new Container(options?: Partial<Transform> & {
   surfaceProfile?: 'convex' | 'concave' | 'lip'
   lightDirection?: number
   specularStrength?: number
-  specularWidth?: number
+  specularWidth?: number | 'hairline'
   specularFalloff?: number
   oppositeSpecularStrength?: number
   specularSharpness?: number
@@ -357,6 +357,8 @@ new Container(options?: Partial<Transform> & {
 ```
 
 When `oppositeSpecularStrength` is omitted, it defaults to the resolved `specularStrength`.
+The default `specularWidth` is `'hairline'`, which resolves to one device pixel at the renderer's current DPR.
+Numeric `specularWidth` values are CSS pixels.
 
 Methods:
 

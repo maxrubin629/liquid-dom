@@ -51,7 +51,7 @@ import type {
   ZStackNode,
   ZStackOptions,
 } from 'laymeout'
-import type { Point, RgbaColor, SurfaceProfile, Transform as SceneTransform } from './types'
+import type { Point, RgbaColor, SpecularWidth, SurfaceProfile, Transform as SceneTransform } from './types'
 
 type SceneNode = SceneContainer | SceneGlass | SceneGroup | SceneStackingContext | SceneHtml
 type SceneParent = GlassScene | SceneNode
@@ -1050,11 +1050,11 @@ export class GlassContainer extends SingleChildUiNode<LaymeoutNode, SceneContain
     }
   }
 
-  get specularWidth(): number {
+  get specularWidth(): SpecularWidth {
     return this.sceneNode.specularWidth
   }
 
-  set specularWidth(value: number) {
+  set specularWidth(value: SpecularWidth) {
     if (setProperty(this.sceneNode, 'specularWidth', value)) {
       this.invalidateFrame('specularWidth')
     }

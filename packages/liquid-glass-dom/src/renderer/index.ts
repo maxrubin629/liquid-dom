@@ -68,7 +68,12 @@ import {
   SHADOW_MASK_SHADER,
 } from '../shaders'
 import { PointerController } from './pointer-controller'
-import type { SurfaceProfile } from '../types'
+import type { SpecularWidth, SurfaceProfile } from '../types'
+
+/** Resolves public specular-width semantics into the shader's device-pixel space. */
+export function resolveSpecularWidthPx(specularWidth: SpecularWidth, dpr: number) {
+  return specularWidth === 'hairline' ? 1 : specularWidth * dpr
+}
 
 /**
  * Constructor options for {@link Renderer}.
@@ -588,7 +593,7 @@ export class Renderer {
       },
       specular: {
         strength: container.specularStrength,
-        width: container.specularWidth * dpr,
+        width: resolveSpecularWidthPx(container.specularWidth, dpr),
         sharpness: container.specularSharpness,
         opacity: container.specularOpacity,
       },

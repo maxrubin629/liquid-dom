@@ -21,6 +21,14 @@ export type RgbaColor = {
 }
 
 /**
+ * Width of the white specular rim.
+ *
+ * Numeric values are CSS pixels. `'hairline'` resolves at render time to one
+ * device pixel for the renderer's current DPR.
+ */
+export type SpecularWidth = number | 'hairline'
+
+/**
  * Cached backdrop statistics measured for a tracked container in a specific renderer.
  */
 export type BackdropMetrics = {
