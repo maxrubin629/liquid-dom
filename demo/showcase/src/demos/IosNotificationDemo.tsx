@@ -202,7 +202,6 @@ function NotificationScene() {
 
     setNotificationOffset(notificationOffset)
   }, {
-    axis: 'x',
     bounds: { left: OPEN_OFFSET, right: 0 },
     from: () => [offsetRef.current, 0],
     preventDefault: true,

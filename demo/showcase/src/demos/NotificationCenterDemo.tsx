@@ -241,7 +241,6 @@ function NotificationCenterScene() {
 
     setPanelY(panelY)
   }, {
-    axis: 'y',
     bounds: { top: PANEL_CLOSED_Y, bottom: PANEL_OPEN_Y },
     from: () => [0, panelTransformRef.current?.y ?? yRef.current],
     preventDefault: true,
