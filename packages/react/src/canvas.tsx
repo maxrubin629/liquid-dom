@@ -12,6 +12,7 @@ import {
 import { Renderer } from '@liquid-dom/core'
 import { LayoutScene } from '@liquid-dom/core/layout'
 import { AnimationManager, AnimationTimeline, type AnimationConfig } from './animation'
+import { useAnimationTimeScaleRef } from './animationConfig'
 import type {
   AnimateFunction,
   FrameCallback,
@@ -406,19 +407,22 @@ export function useInvalidateFrame() {
 /** Returns an imperative retained-node animation function. */
 export function useAnimate(): AnimateFunction {
   const root = useRequiredRoot()
+  const timeScaleRef = useAnimationTimeScaleRef()
   return useCallback((target, values, transition) => {
-    const controls = root.animationManager.animate(target, values, transition)
+    const controls = root.animationManager.animate(target, values, transition, { timeScaleRef })
     root.invalidateFrame()
     return controls
-  }, [root])
+  }, [root, timeScaleRef])
 }
 
 /** Returns a factory for imperative animation timelines. */
 export function useTimeline(defaultTransition?: AnimationConfig) {
   const root = useRequiredRoot()
+  const timeScaleRef = useAnimationTimeScaleRef()
   return useCallback(() => new AnimationTimeline(
     root.animationManager,
     root.invalidateFrame,
     defaultTransition,
-  ), [root, defaultTransition])
+    timeScaleRef,
+  ), [root, defaultTransition, timeScaleRef])
 }

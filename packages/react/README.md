@@ -162,6 +162,7 @@ const [pressed, setPressed] = useState(false)
 
 ```tsx
 import {
+  AnimationConfigProvider,
   Easing,
   easing,
   spring,
@@ -206,6 +207,19 @@ Only properties listed in `transition` animate. Numeric values and numeric objec
 Easing durations are in seconds. `ease` receives normalized progress from `0` to `1` and returns normalized progress. The convenience `Easing` namespace provides `linear`, `easeIn`, `easeOut`, `easeInOut`, and CSS-style `bezier(x1, y1, x2, y2)`.
 
 When an active easing animation is retargeted, it starts a new easing transition from the current interpolated value to the new target. `duration <= 0` snaps immediately.
+
+`AnimationConfigProvider` scales animation time for components and hooks below it:
+
+```tsx
+<AnimationConfigProvider timeScale={0.5}>
+  <Frame
+    width={expanded ? 260 : 140}
+    transition={{ width: spring() }}
+  />
+</AnimationConfigProvider>
+```
+
+`timeScale={2}` runs animations twice as fast, and `timeScale={0.5}` runs them at half speed. It applies to declarative `transition` props, `useAnimate()`, and `useTimeline()` calls under the provider. Active animations respond when `timeScale` changes. Invalid or nonpositive values are treated as `1`.
 
 `useAnimate()` starts direct retained-node animations and returns controls with `finished` and `stop()`. `useTimeline()` creates sequential animation timelines. `useFrame()` registers a callback in the nearest `LayoutCanvas` frame loop.
 

@@ -20,6 +20,7 @@ import {
   Transform,
   ZStack,
   Padding,
+  AnimationConfigProvider,
 } from '@liquid-dom/react'
 import abstractShapesUrl from '../assets/Abstract Shapes.jpg'
 import styles from './MenuDemo.module.css'
@@ -99,7 +100,8 @@ const CONTENT_OPTICS_TRANSITION = easing({
 const CONTENT_IOR = 1
 const CONTENT_DEPTH = 0
 const CONTENT_ACTIVE_IOR = 1.5
-const CONTENT_ACTIVE_DEPTH = 100
+const CONTENT_ACTIVE_DEPTH = 80
+const SLOW_MO_TIME_SCALE = 0.15
 
 type MenuItem = {
   Icon: LucideIcon
@@ -128,6 +130,7 @@ export default function MenuDemo() {
   const [contentOpticsActive, setContentOpticsActive] = useState(false)
   const [buttonHovered, setButtonHovered] = useState(false)
   const [buttonPressed, setButtonPressed] = useState(false)
+  const [slowMo, setSlowMo] = useState(false)
   const ignoreOutsidePressRef = useRef(false)
   const contentOpticsResetRef = useRef<number | null>(null)
   const buttonScale = open
@@ -207,155 +210,167 @@ export default function MenuDemo() {
   return (
     <section className={styles.root} onPointerDown={handlePointerDown}>
       <LayoutCanvas
-      maxDpr={2}
         className={styles.canvasShell}
         canvasClassName={styles.canvas}
       >
-        <ZStack alignment="center">
-          <Html zIndex={-2} sizing="fill">
-            <img
-              alt=""
-              className={styles.backgroundImage}
-              src={abstractShapesUrl}
-            />
-          </Html>
+        <AnimationConfigProvider timeScale={slowMo ? SLOW_MO_TIME_SCALE : 1}>
+          <ZStack alignment="center">
+            <Html zIndex={-2} sizing="fill">
+              <img
+                alt=""
+                className={styles.backgroundImage}
+                src={abstractShapesUrl}
+              />
+            </Html>
 
-          <Frame maxWidth={Infinity} maxHeight={Infinity} alignment="top">
-            <Padding insets={STAGE_PADDING}>
-              <Frame
-                width={STAGE_WIDTH}
-                height={STAGE_HEIGHT}
-                alignment="topLeading"
-              >
-                <GlassContainer
-                  bezelWidth={70}
-                  thickness={80}
-                  blur={20}
-                  tint={{ r: 1, g: 1, b: 1, a: 0.5 }}
-                  shadowColor={{ r: 0, g: 0, b: 0, a: 0.14 }}
-                  shadowOffsetY={18}
-                  shadowBlur={46}
-                  specularOpacity={0.5}
-                  displacementBlur={20}
-                  contentIor={contentOpticsActive ? CONTENT_ACTIVE_IOR : CONTENT_IOR}
-                  contentDepth={contentOpticsActive ? CONTENT_ACTIVE_DEPTH : CONTENT_DEPTH}
-                  transition={{
-                    contentIor: contentOpticsActive ? false : CONTENT_OPTICS_TRANSITION,
-                    contentDepth: contentOpticsActive ? false : CONTENT_OPTICS_TRANSITION,
-                  }}
+            <Frame maxWidth={Infinity} maxHeight={Infinity} alignment="top">
+              <Padding insets={STAGE_PADDING}>
+                <Frame
+                  width={STAGE_WIDTH}
+                  height={STAGE_HEIGHT}
+                  alignment="topLeading"
                 >
-                  <ZStack alignment="topLeading">
-                    <Transform
-                      x={open ? MENU_OPEN_X : MENU_ORIGIN - MENU_WIDTH / 2}
-                      y={open ? MENU_OPEN_Y : MENU_ORIGIN - MENU_HEIGHT / 2}
-                      transition={{
-                        x: open
-                          ? MENU_OPEN_POSITION_TRANSITION
-                          : MENU_CLOSE_POSITION_TRANSITION,
-                        y: open
-                          ? MENU_OPEN_POSITION_TRANSITION
-                          : MENU_CLOSE_POSITION_TRANSITION,
-                      }}
-                    >
-                      <Frame width={MENU_WIDTH} height={MENU_HEIGHT}>
-                        <Glass
-                          cornerRadius={open ? OPEN_MENU_RADIUS : CLOSED_MENU_RADIUS}
-                          pointerEvents={false}
-                          transition={{
-                            cornerRadius: open
-                              ? MENU_OPEN_SIZE_TRANSITION
-                              : MENU_CLOSE_SIZE_TRANSITION,
-                          }}
-                        >
-                          <Frame                                
-                            width={open ? MENU_WIDTH : CLOSED_MENU_SIZE}
-                            height={open ? MENU_HEIGHT : CLOSED_MENU_SIZE}
+                  <GlassContainer
+                    bezelWidth={70}
+                    thickness={80}
+                    blur={20}
+                    tint={{ r: 1, g: 1, b: 1, a: 0.5 }}
+                    shadowColor={{ r: 0, g: 0, b: 0, a: 0.14 }}
+                    shadowOffsetY={18}
+                    shadowBlur={46}
+                    specularOpacity={0.5}
+                    displacementBlur={20}
+                    contentIor={contentOpticsActive ? CONTENT_ACTIVE_IOR : CONTENT_IOR}
+                    contentDepth={contentOpticsActive ? CONTENT_ACTIVE_DEPTH : CONTENT_DEPTH}
+                    transition={{
+                      contentIor: contentOpticsActive ? false : CONTENT_OPTICS_TRANSITION,
+                      contentDepth: contentOpticsActive ? false : CONTENT_OPTICS_TRANSITION,
+                    }}
+                  >
+                    <ZStack alignment="topLeading">
+                      <Transform
+                        x={open ? MENU_OPEN_X : MENU_ORIGIN - MENU_WIDTH / 2}
+                        y={open ? MENU_OPEN_Y : MENU_ORIGIN - MENU_HEIGHT / 2}
+                        transition={{
+                          x: open
+                            ? MENU_OPEN_POSITION_TRANSITION
+                            : MENU_CLOSE_POSITION_TRANSITION,
+                          y: open
+                            ? MENU_OPEN_POSITION_TRANSITION
+                            : MENU_CLOSE_POSITION_TRANSITION,
+                        }}
+                      >
+                        <Frame width={MENU_WIDTH} height={MENU_HEIGHT}>
+                          <Glass
+                            cornerRadius={open ? OPEN_MENU_RADIUS : CLOSED_MENU_RADIUS}
+                            pointerEvents={false}
                             transition={{
-                              width: open
-                                ? MENU_OPEN_SIZE_TRANSITION
-                                : MENU_CLOSE_SIZE_TRANSITION,
-                              height: open
+                              cornerRadius: open
                                 ? MENU_OPEN_SIZE_TRANSITION
                                 : MENU_CLOSE_SIZE_TRANSITION,
                             }}
                           >
-                            <Transform
-                              scaleX={open ? 1 : CLOSED_MENU_CONTENT_SCALE}
-                              scaleY={open ? 1 : CLOSED_MENU_CONTENT_SCALE}
-                              origin={{ x: MENU_WIDTH / 2, y: MENU_HEIGHT / 2 }}
+                            <Frame                                
+                              width={open ? MENU_WIDTH : CLOSED_MENU_SIZE}
+                              height={open ? MENU_HEIGHT : CLOSED_MENU_SIZE}
                               transition={{
-                                scaleX: open ? CONTENT_BLUR_TRANSITION : false,
-                                scaleY: open ? CONTENT_BLUR_TRANSITION : false,
+                                width: open
+                                  ? MENU_OPEN_SIZE_TRANSITION
+                                  : MENU_CLOSE_SIZE_TRANSITION,
+                                height: open
+                                  ? MENU_OPEN_SIZE_TRANSITION
+                                  : MENU_CLOSE_SIZE_TRANSITION,
                               }}
                             >
-                              <Frame width={MENU_WIDTH} height={MENU_HEIGHT}>
-                                <Html
-                                  blur={open ? OPEN_MENU_CONTENT_BLUR : CLOSED_MENU_CONTENT_BLUR}
-                                  opacity={open ? 1 : 0}
-                                  sizing="fill"
-                                  transition={{
-                                    blur: CONTENT_BLUR_TRANSITION,
-                                    opacity: CONTENT_TRANSITION,
-                                  }}
-                                >
-                                  <MenuContent />
-                                </Html>
-                              </Frame>
-                            </Transform>
-                          </Frame>
-                        </Glass>
-                      </Frame>
-                    </Transform>
+                              <Transform
+                                scaleX={open ? 1 : CLOSED_MENU_CONTENT_SCALE}
+                                scaleY={open ? 1 : CLOSED_MENU_CONTENT_SCALE}
+                                origin={{ x: MENU_WIDTH / 2, y: MENU_HEIGHT / 2 }}
+                                transition={{
+                                  scaleX: open ? CONTENT_BLUR_TRANSITION : false,
+                                  scaleY: open ? CONTENT_BLUR_TRANSITION : false,
+                                }}
+                              >
+                                <Frame width={MENU_WIDTH} height={MENU_HEIGHT}>
+                                  <Html
+                                    blur={open ? OPEN_MENU_CONTENT_BLUR : CLOSED_MENU_CONTENT_BLUR}
+                                    opacity={open ? 1 : 0}
+                                    sizing="fill"
+                                    transition={{
+                                      blur: CONTENT_BLUR_TRANSITION,
+                                      opacity: CONTENT_TRANSITION,
+                                    }}
+                                  >
+                                    <MenuContent />
+                                  </Html>
+                                </Frame>
+                              </Transform>
+                            </Frame>
+                          </Glass>
+                        </Frame>
+                      </Transform>
 
-                    <Transform
-                      x={open ? BUTTON_OPEN_X : 0}
-                      y={open ? BUTTON_OPEN_Y : 0}
-                      scaleX={buttonScale}
-                      scaleY={buttonScale}
-                      origin={{ x: BUTTON_SIZE / 2, y: BUTTON_SIZE / 2 }}
-                      transition={{
-                        x: open
-                          ? BUTTON_OPEN_POSITION_TRANSITION
-                          : BUTTON_CLOSE_POSITION_TRANSITION,
-                        y: open
-                          ? BUTTON_OPEN_POSITION_TRANSITION
-                          : BUTTON_CLOSE_POSITION_TRANSITION,
-                        scaleX: BUTTON_SCALE_TRANSITION,
-                        scaleY: BUTTON_SCALE_TRANSITION,
-                      }}
-                    >
-                      <Frame width={BUTTON_SIZE} height={BUTTON_SIZE}>
-                        <Glass
-                          cornerRadius={400}
-                          pointerEvents={!open}
-                          onHover={setButtonHovered}
-                          onPress={setButtonPressed}
-                          onPointerDown={() => {
-                            ignoreOutsidePressRef.current = true
-                            setMenuOpen(true)
-                          }}
-                        >
-                          <Html
-                            opacity={open ? 0 : 1}
-                            sizing="fill"
-                            transition={{
-                              opacity: open
-                                ? BUTTON_CONTENT_OPEN_TRANSITION
-                                : BUTTON_CONTENT_CLOSE_TRANSITION,
+                      <Transform
+                        x={open ? BUTTON_OPEN_X : 0}
+                        y={open ? BUTTON_OPEN_Y : 0}
+                        scaleX={buttonScale}
+                        scaleY={buttonScale}
+                        origin={{ x: BUTTON_SIZE / 2, y: BUTTON_SIZE / 2 }}
+                        transition={{
+                          x: open
+                            ? BUTTON_OPEN_POSITION_TRANSITION
+                            : BUTTON_CLOSE_POSITION_TRANSITION,
+                          y: open
+                            ? BUTTON_OPEN_POSITION_TRANSITION
+                            : BUTTON_CLOSE_POSITION_TRANSITION,
+                          scaleX: BUTTON_SCALE_TRANSITION,
+                          scaleY: BUTTON_SCALE_TRANSITION,
+                        }}
+                      >
+                        <Frame width={BUTTON_SIZE} height={BUTTON_SIZE}>
+                          <Glass
+                            cornerRadius={400}
+                            pointerEvents={!open}
+                            onHover={setButtonHovered}
+                            onPress={setButtonPressed}
+                            onPointerDown={() => {
+                              ignoreOutsidePressRef.current = true
+                              setMenuOpen(true)
                             }}
                           >
-                            <ButtonDots />
-                          </Html>
-                        </Glass>
-                      </Frame>
-                    </Transform>
-                  </ZStack>
-                </GlassContainer>
-              </Frame>
-            </Padding>
-          </Frame>
-        </ZStack>
+                            <Html
+                              opacity={open ? 0 : 1}
+                              sizing="fill"
+                              transition={{
+                                opacity: open
+                                  ? BUTTON_CONTENT_OPEN_TRANSITION
+                                  : BUTTON_CONTENT_CLOSE_TRANSITION,
+                              }}
+                            >
+                              <ButtonDots />
+                            </Html>
+                          </Glass>
+                        </Frame>
+                      </Transform>
+                    </ZStack>
+                  </GlassContainer>
+                </Frame>
+              </Padding>
+            </Frame>
+          </ZStack>
+        </AnimationConfigProvider>
       </LayoutCanvas>
+
+      <button
+        aria-pressed={slowMo}
+        className={`${styles.slowMoToggle} ${slowMo ? styles.slowMoToggleActive : ''}`}
+        type="button"
+        onClick={() => setSlowMo((enabled) => !enabled)}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        <span className={styles.slowMoCheckbox} aria-hidden="true" />
+        Slow mo
+      </button>
     </section>
   )
 }

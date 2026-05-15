@@ -30,6 +30,7 @@ type PropertyAnimation = {
   value: AnimationValue
   config: NormalizedTransition
   elapsed: number
+  timeScaleRef?: AnimationTimeScaleRef
   listeners: Set<() => void>
 }
 
@@ -66,6 +67,14 @@ export type EasingTransition = {
 
 /** Animation transition config accepted by React props and imperative animation calls. */
 export type AnimationConfig = SpringTransition | EasingTransition | true | false | null | undefined
+
+export type AnimationTimeScaleRef = {
+  current: number
+}
+
+type AnimationOptions = {
+  timeScaleRef?: AnimationTimeScaleRef
+}
 
 /** Per-property declarative transition map for a component. */
 export type TransitionMap<T extends object = Record<string, unknown>> = Partial<
@@ -466,6 +475,11 @@ function resolveFinished() {
   return Promise.resolve()
 }
 
+function resolveTimeScale(timeScaleRef: AnimationTimeScaleRef | undefined) {
+  const timeScale = timeScaleRef?.current ?? 1
+  return Number.isFinite(timeScale) && timeScale > 0 ? timeScale : 1
+}
+
 /**
  * Retained animation scheduler ticked by LayoutCanvas' RAF loop.
  */
@@ -483,6 +497,7 @@ export class AnimationManager {
     target: Target | null | undefined,
     values: Partial<Target>,
     transition: AnimationConfig = true,
+    options: AnimationOptions = {},
   ): AnimationControls {
     const config = normalizeTransition(transition)
     if (!target || !config) {
@@ -519,6 +534,7 @@ export class AnimationManager {
       )) {
         existing.config = config
         existing.elapsed = 0
+        existing.timeScaleRef = options.timeScaleRef
         remaining += 1
         const listener = () => {
           remaining -= 1
@@ -544,6 +560,7 @@ export class AnimationManager {
         value,
         config,
         elapsed: 0,
+        timeScaleRef: options.timeScaleRef,
         listeners: new Set(),
       }
       remaining += 1
@@ -602,12 +619,13 @@ export class AnimationManager {
       return false
     }
 
-    const deltaSeconds = Math.max(0, deltaMilliseconds / 1000)
-    const springDeltaSeconds = Math.min(0.064, deltaSeconds)
-    const stepCount = Math.max(1, Math.ceil(springDeltaSeconds / (1 / 60)))
-    const stepSeconds = springDeltaSeconds / stepCount
+    const frameDeltaSeconds = Math.max(0, deltaMilliseconds / 1000)
 
     for (const animation of [...this.animations]) {
+      const deltaSeconds = frameDeltaSeconds * resolveTimeScale(animation.timeScaleRef)
+      const springDeltaSeconds = Math.min(0.064, deltaSeconds)
+      const stepCount = Math.max(1, Math.ceil(springDeltaSeconds / (1 / 60)))
+      const stepSeconds = springDeltaSeconds / stepCount
       let complete = false
 
       if (animation.config.type === 'spring') {
@@ -682,6 +700,7 @@ export class AnimationTimeline {
     private readonly manager: AnimationManager,
     private readonly requestFrame: () => void,
     private readonly defaultTransition: AnimationConfig = true,
+    private readonly timeScaleRef?: AnimationTimeScaleRef,
   ) {}
 
   /** Adds an animation step to the sequence. */
@@ -739,6 +758,7 @@ export class AnimationTimeline {
         step.target,
         step.values,
         step.transition ?? this.defaultTransition,
+        { timeScaleRef: this.timeScaleRef },
       )
       this.requestFrame()
       await this.currentControls.finished

@@ -13,6 +13,7 @@ import {
   Overlay,
   VStack,
   ZStack,
+  AnimationConfigProvider,
   AnimationManager,
   Easing,
   easing,
@@ -328,6 +329,71 @@ describe('React layout components', () => {
     expect(linearBezier(0.5)).toBeCloseTo(0.5)
     expect(linearBezier(0.75)).toBeCloseTo(0.75)
     expect(linearBezier(1)).toBeCloseTo(1)
+  })
+
+  it('scales declarative animations under AnimationConfigProvider', async () => {
+    const frameRef = createRef<FrameRef>()
+    const transition = { width: easing({ duration: 1, ease: Easing.linear }) }
+    const renderFrame = (width: number, timeScale: number) => (
+      <LayoutCanvas frameloop="demand" proposal={{ width: 320, height: 200 }}>
+        <AnimationConfigProvider timeScale={timeScale}>
+          <Frame
+            ref={frameRef}
+            width={width}
+            height={20}
+            transition={transition}
+          >
+            <Html sizing="fill" />
+          </Frame>
+        </AnimationConfigProvider>
+      </LayoutCanvas>
+    )
+
+    const view = await renderReact(renderFrame(0, 1))
+    flushFrame(16)
+
+    await view.rerender(renderFrame(100, 1))
+    flushFrame(266)
+    expect(frameRef.current?.width).toBeCloseTo(25)
+
+    await view.rerender(renderFrame(100, 2))
+    flushFrame(516)
+    expect(frameRef.current?.width).toBeCloseTo(75)
+  })
+
+  it('scales useAnimate animations under AnimationConfigProvider', async () => {
+    const frameRef = createRef<FrameRef>()
+
+    function AnimateTrigger() {
+      const animate = useAnimate()
+
+      useEffect(() => {
+        animate(frameRef.current, { width: 100 }, easing({
+          duration: 1,
+          ease: Easing.linear,
+        }))
+      }, [animate])
+
+      return null
+    }
+
+    await renderReact(
+      <LayoutCanvas frameloop="demand" proposal={{ width: 320, height: 200 }}>
+        <AnimationConfigProvider timeScale={2}>
+          <ZStack>
+            <AnimateTrigger />
+            <Frame ref={frameRef} width={0} height={20}>
+              <Html sizing="fill" />
+            </Frame>
+          </ZStack>
+        </AnimationConfigProvider>
+      </LayoutCanvas>,
+    )
+
+    flushFrame(16)
+    flushFrame(266)
+
+    expect(frameRef.current?.width).toBeCloseTo(50)
   })
 
   it('exposes refs and mirrors children in React order', async () => {

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import type { ComponentTransition } from './animation'
 import { resolveTransition } from './animation'
+import { useAnimationTimeScaleRef } from './animationConfig'
 import { useRequiredRoot } from './tree'
 
 type PropValues = Record<string, unknown>
@@ -45,6 +46,7 @@ export function useAnimatedProps<Target extends object, Values extends PropValue
   options: AnimatedPropsOptions = {},
 ) {
   const root = useRequiredRoot()
+  const timeScaleRef = useAnimationTimeScaleRef()
   const mountedRef = useRef(false)
   const previousRef = useRef<PropValues | null>(null)
   const assignUndefined = options.assignUndefined ?? true
@@ -66,7 +68,12 @@ export function useAnimatedProps<Target extends object, Values extends PropValue
         : undefined
 
       if (transitionConfig) {
-        root.animationManager.animate(target, { [property]: value } as Partial<Target>, transitionConfig)
+        root.animationManager.animate(
+          target,
+          { [property]: value } as Partial<Target>,
+          transitionConfig,
+          { timeScaleRef },
+        )
         root.invalidateFrame()
       } else {
         root.animationManager.stop(target, [property])

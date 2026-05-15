@@ -10,6 +10,12 @@ export {
   useTimeline,
 } from './canvas'
 export {
+  AnimationConfigProvider,
+} from './animationConfig'
+export type {
+  AnimationConfigProviderProps,
+} from './animationConfig'
+export {
   AnimationManager,
   AnimationTimeline,
   Easing,
@@ -20,6 +26,7 @@ export type {
   AnimationControls,
   EasingFunction,
   EasingTransition,
+  AnimationTimeScaleRef,
   SpringTransition,
   TransitionMap,
 } from './animation'
