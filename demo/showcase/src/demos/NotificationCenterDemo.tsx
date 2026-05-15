@@ -8,7 +8,6 @@ import {
   HStack,
   Html,
   LayoutCanvas,
-  Overlay,
   Padding,
   Spacer,
   spring,

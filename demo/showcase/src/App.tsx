@@ -2,6 +2,7 @@ import { type ComponentType, type CSSProperties, useState } from 'react'
 import { Leva } from 'leva'
 import ControlCenterDemo from './demos/ControlCenterDemo'
 import IosNotificationDemo from './demos/IosNotificationDemo'
+import MenuDemo from './demos/MenuDemo'
 import MusicSidebarDemo from './demos/MusicSidebarDemo'
 import NotificationCenterDemo from './demos/NotificationCenterDemo'
 import VideoControlsDemo from './demos/VideoControlsDemo'
@@ -23,6 +24,7 @@ const showcases: Showcase[] = [
   { id: 'video-controls', label: 'Video Controls', Component: VideoControlsDemo },
   { id: 'music-sidebar', label: 'Music Sidebar', Component: MusicSidebarDemo },
   { id: 'control-center', label: 'Control Center', Component: ControlCenterDemo },
+  { id: 'menu', label: 'Menu', Component: MenuDemo },
   {
     id: 'notification-center',
     label: 'Notification Center',
