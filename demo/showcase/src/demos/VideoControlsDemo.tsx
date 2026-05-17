@@ -218,30 +218,26 @@ function ControlButton({
         scaleY: BUTTON_SCALE_TRANSITION,
       }}
     >
-      <Glass
-        cornerRadius={size / 2}
-        pointerEvents={visible}
-        onClick={onClick}
-        onHover={setHovered}
-        onPress={setPressed}
-      >
-        <Overlay
-          overlay={
-            <Html sizing="fill">
-              <div
-                className={styles.iconContent}
-                aria-label={label}
-                data-visible={contentVisible}
-                data-blur={contentBlur}
-              >
-                {children}
-              </div>
-            </Html>
-          }
+      <Frame width={200} height={size}>
+        <Glass
+          cornerRadius={size / 2}
+          pointerEvents={visible}
+          onClick={onClick}
+          onHover={setHovered}
+          onPress={setPressed}
         >
-          <Frame width={size} height={size} />
-        </Overlay>
-      </Glass>
+          <Html sizing="fill">
+            <div
+              className={styles.iconContent}
+              aria-label={label}
+              data-visible={contentVisible}
+              data-blur={contentBlur}
+            >
+              {children}
+            </div>
+          </Html>
+        </Glass>
+      </Frame>
     </Transform>
   )
 }
