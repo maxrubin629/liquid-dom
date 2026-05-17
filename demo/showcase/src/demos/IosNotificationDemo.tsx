@@ -335,16 +335,16 @@ function NotificationContent() {
   return (
     <div className={styles.content}>
       <div className={styles.avatar}>
-        SS
+        JA
       </div>
 
       <div className={styles.copy}>
         <div className={styles.heading}>
-          <strong>Sonia Shaikh</strong>
+          <strong>John Appleseed</strong>
           <span>27m ago</span>
         </div>
         <p className={styles.message}>
-          I think GM of anthropic in Australia just responded to me using Claude agent lol
+          My orchard just shipped a critical bug fix. The apples now fall closer to the tree.
         </p>
       </div>
     </div>
