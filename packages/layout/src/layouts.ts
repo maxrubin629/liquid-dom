@@ -530,7 +530,10 @@ class NoopLayoutNode extends BaseLayoutNode implements NoopNode {
   }
 
   override measureSelf(input: LayoutMeasureInput): Size {
-    return input.children[0]?.measure(input.proposal) ?? { width: 0, height: 0 }
+    return input.children[0]?.measure(input.proposal) ?? {
+      width: input.proposal.width ?? 0,
+      height: input.proposal.height ?? 0,
+    }
   }
 
   override placeChildren(input: LayoutPlaceInput): void {
@@ -700,12 +703,12 @@ function frameChildProposal(proposal: ProposedSize, props: FrameRuntimeProps): P
 function frameReportedSize(childSize: Size, proposal: ProposedSize, props: FrameRuntimeProps): Size {
   const width =
     props.width ??
-    (props.maxWidth === Number.POSITIVE_INFINITY && proposal.width !== undefined
+    (props.maxWidth === Infinity && proposal.width !== undefined
       ? Math.max(childSize.width, proposal.width)
       : childSize.width)
   const height =
     props.height ??
-    (props.maxHeight === Number.POSITIVE_INFINITY && proposal.height !== undefined
+    (props.maxHeight === Infinity && proposal.height !== undefined
       ? Math.max(childSize.height, proposal.height)
       : childSize.height)
 

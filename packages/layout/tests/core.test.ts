@@ -152,6 +152,19 @@ describe('built-in layouts', () => {
     expect(rect(child)).toEqual({ x: 0, y: 0, width: 30, height: 40 })
   })
 
+  it('measures empty noop from the proposal', () => {
+    const root = noop()
+
+    layout(root, { width: 80 })
+
+    expect(rect(root)).toEqual({
+      x: 0,
+      y: 0,
+      width: 80,
+      height: 0,
+    })
+  })
+
   it('stores child rects in parent-local coordinates', () => {
     const leading = box({ width: 10, height: 10 })
     const nested = box({ width: 8, height: 8 })
