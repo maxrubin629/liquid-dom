@@ -77,7 +77,7 @@ export default function App() {
               onClick={() => setActiveDemo('layout')}
             >
               <span>Layout scene</span>
-              <small>Retained layout tree driving glass scene nodes</small>
+              <small>Layout tree driving glass scene nodes</small>
             </button>
             <button
               type="button"

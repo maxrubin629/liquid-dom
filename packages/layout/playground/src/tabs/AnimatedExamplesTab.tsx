@@ -84,7 +84,7 @@ export function AnimatedExamplesTab() {
       <header className="panel-header">
         <div>
           <h2>Animated layout parameters</h2>
-          <p>Each frame mutates retained layout nodes with changing spacing, padding, frame, and overlay parameters.</p>
+          <p>Each frame mutates layout nodes with changing spacing, padding, frame, and overlay parameters.</p>
         </div>
         <div className="fps-meter">
           <span>FPS</span>

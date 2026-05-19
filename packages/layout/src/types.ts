@@ -167,7 +167,7 @@ export type LayoutEngineOptions = {
   onInvalidate?: (invalidation: LayoutInvalidation) => void
   dev?: boolean
   /**
-   * Maximum measurement entries retained by the engine. Set to 0 to disable
+   * Maximum measurement entries kept by the engine. Set to 0 to disable
    * measurement caching entirely.
    */
   maxCachedMeasurements?: number

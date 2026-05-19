@@ -28,7 +28,7 @@ describe('dom adapter', () => {
     document.body.replaceChildren()
   })
 
-  it('measures HTMLElement border boxes and writes retained node geometry', () => {
+  it('measures HTMLElement border boxes and writes node geometry', () => {
     const first = elementWithSize(30, 20)
     const second = elementWithSize(40, 10)
     document.body.append(first, second)
@@ -74,7 +74,7 @@ describe('dom adapter', () => {
     expect(engine.getDebugStats().invalidations).toBe(1)
   })
 
-  it('reuses DOM subscriptions when assigning the same retained leaf as root again', () => {
+  it('reuses DOM subscriptions when assigning the same leaf as root again', () => {
     const element = elementWithSize(30, 20)
     const node = domLeaf({ element })
     const engine = createLayoutEngine({ root: node })

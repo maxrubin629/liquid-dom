@@ -2,7 +2,7 @@
 
 ## Description
 
-`@liquid-dom/r3f` bridges React Three Fiber, Three's WebGPU renderer, and the retained React liquid-glass scene. It renders your R3F scene into an intermediate backdrop target, then composites liquid glass over it.
+`@liquid-dom/r3f` bridges React Three Fiber, Three's WebGPU renderer, and the React liquid-glass scene. It renders your R3F scene into an intermediate backdrop target, then composites liquid glass over it.
 
 ## Install
 
@@ -75,7 +75,7 @@ export function App() {
 </LiquidGlassR3F.Root>
 ```
 
-- `LiquidGlassR3F.Root` shares the retained scene ref and invalidation bridge.
+- `LiquidGlassR3F.Root` shares the scene ref and invalidation bridge.
 - `LiquidGlassR3F.Scene` creates a headless `LiquidScene` for liquid-glass React components.
 - `LiquidGlassR3F.Render` runs inside the R3F canvas and takes over final rendering with a positive frame priority.
 - `LiquidGlassR3F` is also callable as the render component, so `<LiquidGlassR3F />` is equivalent to `<LiquidGlassR3F.Render />`.
@@ -134,7 +134,7 @@ The hook also accepts `sceneRootRef` and `deferUntilSceneRoot`.
 - This package requires R3F with an initialized Three WebGPU renderer.
 - DOM-backed `Html` content from `@liquid-dom/react` requires the experimental HTML-in-Canvas API, currently available only behind Chrome's Canvas Draw Element flag: `chrome://flags/#canvas-draw-element`.
 - `renderPriority` must be positive so the bridge can take over final rendering.
-- The component API wires retained-scene invalidations into R3F invalidation, including demand-driven frame loops.
+- The component API wires liquid-scene invalidations into R3F invalidation, including demand-driven frame loops.
 - The hook API is lower-level. If you use it directly, make sure the supplied `LiquidScene` invalidates R3F when layout or frame state changes.
 - The bridge renders the R3F scene into an internal target before compositing liquid glass.
 - Reference: [WICG HTML-in-Canvas](https://wicg.github.io/html-in-canvas/).

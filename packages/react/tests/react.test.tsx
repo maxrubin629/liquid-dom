@@ -569,7 +569,7 @@ describe('React layout components', () => {
     expect(secondRef.current?.height).toBe(80)
   })
 
-  it('exposes useAnimate for direct retained-node animations', async () => {
+  it('exposes useAnimate for direct node animations', async () => {
     const frameRef = createRef<FrameRef>()
 
     function AnimateTrigger() {
@@ -625,7 +625,7 @@ describe('React layout components', () => {
     expect(htmlRef.current?.element?.querySelector('[data-testid="inside-html"]')?.textContent).toBe('Hello')
   })
 
-  it('passes Html blur props through the retained ref', async () => {
+  it('passes Html blur props through the ref', async () => {
     const htmlRef = createRef<HtmlRef>()
 
     const view = await renderReact(
@@ -653,7 +653,7 @@ describe('React layout components', () => {
     expect(htmlRef.current?.blur).toBe(3)
   })
 
-  it('schedules layout when Html is mutated through its retained ref', async () => {
+  it('schedules layout when Html is mutated through its ref', async () => {
     const htmlRef = createRef<HtmlRef>()
 
     await renderReact(
@@ -763,7 +763,7 @@ describe('React layout components', () => {
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
-  it('passes Glass corner smoothing props through the retained ref', async () => {
+  it('passes Glass corner smoothing props through the ref', async () => {
     const glassRef = createRef<GlassRef>()
 
     const view = await renderReact(

@@ -2,7 +2,7 @@
 
 ## Description
 
-`@liquid-dom/react` provides React 19 bindings for the retained liquid-glass layout API. It lets React describe a retained scene while the renderer mutates layout nodes directly between renders.
+`@liquid-dom/react` provides React 19 bindings for the liquid-glass layout API. It lets React describe a layout scene while the renderer mutates layout nodes directly between renders.
 
 Use `LiquidCanvas` when the React package should create and own the WebGPU canvas. Use `LiquidScene` when another renderer, such as a Three adapter, owns the output.
 
@@ -44,7 +44,7 @@ export function App() {
 
 ### Roots
 
-`LiquidCanvas` owns a retained liquid scene, a `Renderer`, a canvas, and a frame loop.
+`LiquidCanvas` owns a liquid scene, a `Renderer`, a canvas, and a frame loop.
 
 Common props:
 
@@ -55,7 +55,7 @@ Common props:
 - `frameloop`: `'always'` or `'demand'`.
 - `onError`: frame-loop error handler.
 
-`LiquidScene` is headless. It builds a retained liquid scene without creating a renderer or canvas. Use its ref from another renderer and call `update(proposal, delta)` before rendering.
+`LiquidScene` is headless. It builds a liquid scene without creating a renderer or canvas. Use its ref from another renderer and call `update(proposal, delta)` before rendering.
 
 ### Layout Components
 
@@ -73,14 +73,14 @@ import {
 } from '@liquid-dom/react'
 ```
 
-These components mirror the retained layout classes from `@liquid-dom/core/layout`.
+These components mirror the layout classes from `@liquid-dom/core/layout`.
 
 - `HStack`, `VStack`, and `ZStack` arrange children.
 - `Frame`, `Padding`, and `Spacer` constrain or expand layout.
 - `Background` and `Overlay` add decoration slots that do not affect content size.
 - `Transform` applies scene transforms after layout. Its `origin` is a unit point in the measured layout bounds, where `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center.
 
-All layout components expose refs to their retained nodes and accept a `transition` prop for animatable property changes.
+All layout components expose refs to their nodes and accept a `transition` prop for animatable property changes.
 
 Some layout components accept exactly one direct child: `Frame`, `Padding`, `Transform`, `GlassContainer`, and `Glass`. If you need multiple children inside one of these components, wrap them in a multi-child layout component such as `HStack`, `VStack`, or `ZStack`, then pass that wrapper as the single child.
 
@@ -92,7 +92,7 @@ import { Glass, GlassContainer, Html } from '@liquid-dom/react'
 
 - `GlassContainer` owns the optical settings shared by its glass children, including blur, spacing, tint, refraction, specular, and shadow options.
 - `Glass` defines one smooth rounded-rectangle glass shape and can opt into pointer events.
-- `Html` renders React children into a DOM element owned by the retained `Html` node.
+- `Html` renders React children into a DOM element owned by the `Html` node.
 
 `Glass` shape props include uniform `cornerRadius` and analytic `cornerSmoothing`:
 
@@ -232,7 +232,7 @@ When an active easing animation is retargeted, it starts a new easing transition
 
 `timeScale={2}` runs animations twice as fast, and `timeScale={0.5}` runs them at half speed. It applies to declarative `transition` props, `useAnimate()`, and `useTimeline()` calls under the provider. Active animations respond when `timeScale` changes. Invalid or nonpositive values are treated as `1`.
 
-`useAnimate()` starts direct retained-node animations and returns controls with `finished` and `stop()`. `useTimeline()` creates sequential animation timelines. `useFrame()` registers a callback in the nearest `LiquidCanvas` frame loop.
+`useAnimate()` starts direct node animations and returns controls with `finished` and `stop()`. `useTimeline()` creates sequential animation timelines. `useFrame()` registers a callback in the nearest `LiquidCanvas` frame loop.
 
 ## Integration Notes
 
@@ -241,8 +241,8 @@ When an active easing animation is retargeted, it starts a new easing transition
 - DOM-backed `Html` content requires the experimental HTML-in-Canvas API, currently available only behind Chrome's Canvas Draw Element flag: `chrome://flags/#canvas-draw-element`.
 - `LiquidCanvas` is the only root that exposes `useRenderer()`. Calling `useRenderer()` under `LiquidScene` throws.
 - `LiquidScene` exposes `onInvalidateFrame` and `onInvalidateLayout` so external renderers can support demand-driven rendering.
-- React children inside `Html` are portaled into retained DOM hosts.
-- The retained scene mutates outside React render. Use refs and hooks for imperative animation and renderer interop.
+- React children inside `Html` are portaled into layout-owned DOM hosts.
+- The layout scene mutates outside React render. Use refs and hooks for imperative animation and renderer interop.
 - Reference: [WICG HTML-in-Canvas](https://wicg.github.io/html-in-canvas/).
 
 ## Local Development

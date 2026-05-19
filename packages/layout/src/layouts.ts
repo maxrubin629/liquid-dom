@@ -1,4 +1,4 @@
-import { BaseLayoutNode, normalizeChildInputs, splitOptions } from './node'
+import { BaseLayoutNode, isLayoutNode, normalizeChildInputs, splitOptions } from './node'
 import type {
   Alignment,
   Axis,
@@ -119,7 +119,7 @@ export function zstack(...args: unknown[]): ZStackNode {
 export function frame(node: LayoutNode, options?: FrameOptions): FrameNode
 export function frame(options?: FrameOptions): FrameNode
 export function frame(input?: LayoutNode | FrameOptions, options: FrameOptions = {}): FrameNode {
-  if (isRetainedNode(input)) {
+  if (isLayoutNode(input)) {
     return new FrameLayoutNode(options, [input])
   }
   return new FrameLayoutNode((input ?? {}) as FrameOptions, [])
@@ -132,7 +132,7 @@ export function padding(
   input?: LayoutNode | InsetsInput | PaddingOptions,
   insetsOrOptions?: InsetsInput | PaddingOptions,
 ): PaddingNode {
-  if (isRetainedNode(input)) {
+  if (isLayoutNode(input)) {
     return new PaddingLayoutNode(parsePaddingOptions(insetsOrOptions), [input])
   }
   return new PaddingLayoutNode(parsePaddingOptions(input), [])
@@ -162,7 +162,7 @@ export function defineLayout(
   options: DefineLayoutOptions,
   ...children: ChildInput[]
 ): CustomLayoutNode {
-  return new CustomRetainedLayoutNode(options, normalizeChildInputs(children))
+  return new CustomLayoutNodeImpl(options, normalizeChildInputs(children))
 }
 
 class LeafLayoutNode extends BaseLayoutNode implements LeafNode {
@@ -575,7 +575,7 @@ class DecorationLayoutNode extends BaseLayoutNode implements DecorationNode {
   }
 }
 
-class CustomRetainedLayoutNode extends BaseLayoutNode implements CustomLayoutNode {
+class CustomLayoutNodeImpl extends BaseLayoutNode implements CustomLayoutNode {
   private _props: unknown
   private readonly measureFn: (input: LayoutMeasureInput) => Size
   private readonly placeFn: (input: LayoutPlaceInput) => void
@@ -790,12 +790,6 @@ function sanitizeLength(value: number): number {
 function sanitizeOptionalLength(value: number | undefined): number | undefined {
   if (value === undefined) return undefined
   return sanitizeLength(value)
-}
-
-function isRetainedNode(value: unknown): value is LayoutNode {
-  return Boolean(
-    value && typeof value === 'object' && (value as { __liquidDomLayout?: unknown }).__liquidDomLayout === true,
-  )
 }
 
 export function propsSignature(value: unknown): string {

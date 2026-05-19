@@ -112,7 +112,7 @@ export function DomLeavesTab() {
       <header className="panel-header">
         <div>
           <h2>DOM intrinsic leaves</h2>
-          <p>Real HTML elements are measured as leaves, then positioned from their retained node tree.</p>
+          <p>Real HTML elements are measured as leaves, then positioned from their layout tree.</p>
         </div>
         <button type="button" id="dom-toggle" onClick={() => setExpanded((value) => !value)}>
           Toggle content

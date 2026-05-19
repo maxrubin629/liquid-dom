@@ -220,7 +220,7 @@ export function isLayoutNode(value: unknown): value is LayoutNode {
 
 export function asInternalNode(node: LayoutNode): BaseLayoutNode {
   if (node instanceof BaseLayoutNode) return node
-  throw new Error('Expected a retained layout node.')
+  throw new Error('Expected a layout node.')
 }
 
 export function normalizeChildInputs(inputs: readonly ChildInput[]): LayoutNode[] {

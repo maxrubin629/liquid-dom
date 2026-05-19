@@ -186,7 +186,7 @@ describe('built-in layouts', () => {
     expect(withOverlay.children).toEqual([overlayContent, overlayDecoration])
   })
 
-  it('writes rects on nodes and preserves graph metadata on retained nodes', () => {
+  it('writes rects on nodes and preserves graph metadata on nodes', () => {
     const content = box({ width: 20, height: 10 })
     const group = vstack(content)
     const decoration = box({ width: 20, height: 10 })
@@ -240,8 +240,8 @@ describe('built-in layouts', () => {
   })
 })
 
-describe('retained mutation and caching', () => {
-  it('returns stats and updates node layout when retained properties change', () => {
+describe('mutation and caching', () => {
+  it('returns stats and updates node layout when properties change', () => {
     const first = box({ width: 10, height: 10 })
     const second = box({ width: 10, height: 10 })
     const row = hstack({ spacing: 5 }, first, second)

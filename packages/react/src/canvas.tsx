@@ -55,7 +55,7 @@ function applyStyle(element: HTMLElement, style: CSSProperties | undefined) {
   Object.assign(element.style, style)
 }
 
-/** Headless React root that builds a retained liquid scene without owning a renderer. */
+/** Headless React root that builds a liquid scene without owning a renderer. */
 export function LiquidScene({
   ref,
   children,
@@ -133,7 +133,7 @@ export function LiquidScene({
   )
 }
 
-/** Root component that owns a retained liquid scene, renderer, canvas, and frame loop. */
+/** Root component that owns a liquid scene, renderer, canvas, and frame loop. */
 export function LiquidCanvas({
   ref,
   children,
@@ -380,7 +380,7 @@ export function useFrame(callback: FrameCallback, priority = 0) {
   useEffect(() => root.registerFrame(callbackRef, priority), [root, priority])
 }
 
-/** Returns the nearest retained liquid scene. */
+/** Returns the nearest liquid scene. */
 export function useLiquidScene() {
   return useRequiredRoot().layoutScene
 }
@@ -404,7 +404,7 @@ export function useInvalidateFrame() {
   return useRequiredRoot().invalidateFrame
 }
 
-/** Returns an imperative retained-node animation function. */
+/** Returns an imperative node animation function. */
 export function useAnimate(): AnimateFunction {
   const root = useRequiredRoot()
   const timeScaleRef = useAnimationTimeScaleRef()

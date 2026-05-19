@@ -29,7 +29,7 @@ HStack
 ```
 
 The parent `HStack` should lay out `A`, `B`, and `C` as direct effective
-children, while the retained tree still keeps `A` and `B` under the `Noop`.
+children, while the layout tree still keeps `A` and `B` under the `Noop`.
 
 ## Core Idea
 
@@ -42,7 +42,7 @@ A `noop` should become a transparent projection node:
 - It still receives a layout rect derived from the union of its effective
   descendants so wrappers can use that rect for transforms or scene graph state.
 
-In other words, `noop` remains part of the retained tree, but not part of the
+In other words, `noop` remains part of the layout tree, but not part of the
 parent's layout child list.
 
 ## Child Projection
@@ -230,7 +230,7 @@ path and therefore keep their existing cache behavior.
 
 The parent measurement cache key should include a projected child signature,
 because the parent's real measurement input is now its projected effective
-children, not only its direct retained children.
+children, not only its direct layout children.
 
 A projected child signature could include:
 
@@ -264,7 +264,7 @@ children:
 - glass nodes
 - other layout-neutral scene graph wrappers
 
-The wrapper would keep its retained scene hierarchy, but its children would
+The wrapper would keep its scene hierarchy, but its children would
 participate directly in the nearest real layout parent.
 
 Single-child restrictions would remain on nodes whose layout semantics are
@@ -276,5 +276,4 @@ actually single-child, such as `Frame` and `Padding`.
 - Do not allow `noop` as the root.
 - Do not give `noop` fallback measurement or placement behavior.
 - Do not implement transparency in React or another wrapper layer only; the
-  retained layout engine should own this behavior.
-
+  layout engine should own this behavior.

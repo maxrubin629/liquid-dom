@@ -41,7 +41,7 @@ export type LiquidGlassR3FRenderTargetOptions = Pick<
 >
 
 export type UseLiquidGlassR3FOptions = {
-  /** Ref exposed by LiquidScene. The hook renders this retained liquid-glass scene over the R3F scene. */
+  /** Ref exposed by LiquidScene. The hook renders this liquid-glass scene over the R3F scene. */
   sceneRootRef: RefObject<LiquidSceneRef | null>
   /** Wait for sceneRootRef.current instead of throwing when the root is not mounted yet. */
   deferUntilSceneRoot?: boolean
@@ -346,7 +346,7 @@ export function LiquidGlassR3FRoot({ children, sceneRootRef }: LiquidGlassR3FRoo
   )
 }
 
-/** DOM-side retained liquid-glass scene. Render this as a sibling of the R3F Canvas. */
+/** DOM-side liquid-glass scene. Render this as a sibling of the R3F Canvas. */
 export function LiquidGlassR3FScene({ children }: LiquidGlassR3FSceneProps) {
   const context = useRequiredLiquidGlassR3FContext('LiquidGlassR3F.Scene')
 

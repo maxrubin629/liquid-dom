@@ -72,7 +72,7 @@ export default function AnimationDemo() {
             <div className="animation-backdrop">
               <div className="animation-copy">
                 <span>React animation API</span>
-                <strong>Springs, retained refs, timeline steps</strong>
+                <strong>Springs, refs, timeline steps</strong>
                 <p>Layout values and glass properties update on the renderer frame loop.</p>
               </div>
               <div className="animation-ruler animation-ruler-a" />
@@ -154,7 +154,7 @@ function AnimationScene({ spacing, cardWidth, fan, sequence }: AnimationScenePro
                 <Html sizing="fill">
                   <div className="animation-banner">
                     <span>Declarative sliders</span>
-                    <strong>Change the controls and the retained nodes spring to their targets.</strong>
+                    <strong>Change the controls and the layout nodes spring to their targets.</strong>
                   </div>
                 </Html>
               </Glass>

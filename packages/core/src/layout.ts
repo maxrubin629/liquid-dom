@@ -36,7 +36,7 @@ import type {
   LayoutEngine,
   LayoutEngineOptions,
   LayoutInvalidation,
-  LayoutNode as RetainedLayoutNode,
+  LayoutNode,
   LeafNode,
   LeafSubscribe,
   PaddingNode,
@@ -57,7 +57,7 @@ type SceneNode = SceneContainer | SceneGlass | SceneGroup | SceneStackingContext
 type SceneParent = GlassScene | SceneNode
 type UiParent = LayoutScene | UiNode
 
-/** Any node accepted by the retained layout UI tree. */
+/** Any node accepted by the layout UI tree. */
 export type LayoutUiNode =
   | HStack
   | VStack
@@ -78,14 +78,14 @@ export type LayoutSceneOptions = Omit<LayoutEngineOptions, 'root'> & {
   root?: LayoutUiNode
 }
 
-/** Kind of retained layout UI invalidation emitted by {@link LayoutScene}. */
+/** Kind of layout UI invalidation emitted by {@link LayoutScene}. */
 export type LayoutSceneInvalidationKind = 'layout' | 'frame'
 
-/** Invalidation emitted when retained layout UI nodes are mutated imperatively. */
+/** Invalidation emitted when layout UI nodes are mutated imperatively. */
 export type LayoutSceneInvalidation = {
   /** Whether the mutation requires a layout pass or only a new frame. */
   kind: LayoutSceneInvalidationKind
-  /** Optional source node for mutations that came from the retained UI tree. */
+  /** Optional source node for mutations that came from the layout UI tree. */
   node?: LayoutUiNode
   /** Optional low-level invalidation detail. */
   cause?: unknown
@@ -114,7 +114,7 @@ export type HtmlOptions = {
   sizing?: DomLeafSizing
 }
 
-/** Unit-space origin for a retained layout transform. `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center. */
+/** Unit-space origin for a layout transform. `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center. */
 export type UnitPoint = {
   x: number
   y: number
@@ -206,10 +206,10 @@ function assertNoUiCycle(parent: UiNode, child: UiNode) {
  * Base class for nodes in the liquid-glass layout UI tree.
  */
 abstract class UiNode<
-  Layout extends RetainedLayoutNode = RetainedLayoutNode,
+  Layout extends LayoutNode = LayoutNode,
   SceneRef extends SceneNode | null = SceneNode | null,
 > {
-  /** Retained node owned by the @liquid-dom/layout engine. */
+  /** Node owned by the @liquid-dom/layout engine. */
   readonly layoutNode: Layout
   /** Scene graph node owned by the liquid-glass renderer, when this node has one. */
   readonly sceneNode: SceneRef
@@ -321,7 +321,7 @@ abstract class UiNode<
  * Base class for layout nodes that accept exactly one child.
  */
 abstract class SingleChildUiNode<
-  Layout extends RetainedLayoutNode = RetainedLayoutNode,
+  Layout extends LayoutNode = LayoutNode,
   SceneRef extends SceneNode | null = SceneNode | null,
 > extends UiNode<Layout, SceneRef> {
   override add<T extends LayoutUiNode>(child: T): T {
@@ -341,7 +341,7 @@ abstract class SingleChildUiNode<
 export class LayoutScene {
   /** Raw scene consumed by {@link import('./renderer').Renderer}. */
   readonly scene = new GlassScene()
-  /** Retained layout engine used to measure and place the UI tree. */
+  /** Layout engine used to measure and place the UI tree. */
   readonly engine: LayoutEngine
 
   private _root: LayoutUiNode | null = null
@@ -366,7 +366,7 @@ export class LayoutScene {
     return this._root
   }
 
-  /** Adds a listener for retained UI mutations that require layout or rendering work. */
+  /** Adds a listener for UI mutations that require layout or rendering work. */
   addInvalidationListener(listener: LayoutSceneInvalidationListener): () => void {
     this.invalidationListeners.add(listener)
     return () => {
@@ -666,7 +666,7 @@ export class Padding extends SingleChildUiNode<PaddingNode, SceneGroup> {
   }
 }
 
-abstract class DecorationUiNode extends UiNode<RetainedLayoutNode, SceneStackingContext> {
+abstract class DecorationUiNode extends UiNode<LayoutNode, SceneStackingContext> {
   private readonly emptyContent = createNoop()
   private readonly emptyDecoration = createNoop()
   private readonly contentSlot = new SceneStackingContext()
@@ -675,7 +675,7 @@ abstract class DecorationUiNode extends UiNode<RetainedLayoutNode, SceneStacking
   private decoration: LayoutUiNode | null = null
 
   protected constructor(
-    layoutNode: RetainedLayoutNode,
+    layoutNode: LayoutNode,
     private readonly sceneOrder: 'background' | 'overlay',
   ) {
     super(layoutNode, new SceneStackingContext())
@@ -811,7 +811,7 @@ export class Overlay extends DecorationUiNode {
 /**
  * Layout pass-through node that contributes an explicit scene transform.
  */
-export class Transform extends SingleChildUiNode<RetainedLayoutNode, SceneGroup> {
+export class Transform extends SingleChildUiNode<LayoutNode, SceneGroup> {
   private _x = 0
   private _y = 0
   private _scaleX = 1
@@ -935,7 +935,7 @@ export class Transform extends SingleChildUiNode<RetainedLayoutNode, SceneGroup>
 /**
  * Liquid-glass container view backed by a scene {@link SceneContainer}.
  */
-export class GlassContainer extends SingleChildUiNode<RetainedLayoutNode, SceneContainer> {
+export class GlassContainer extends SingleChildUiNode<LayoutNode, SceneContainer> {
   constructor(options: GlassContainerOptions = {}) {
     super(createNoop(), new SceneContainer(options))
   }
@@ -1244,7 +1244,7 @@ export class GlassContainer extends SingleChildUiNode<RetainedLayoutNode, SceneC
 /**
  * Liquid-glass shape view backed by a scene {@link SceneGlass}.
  */
-export class Glass extends SingleChildUiNode<RetainedLayoutNode, SceneGlass> {
+export class Glass extends SingleChildUiNode<LayoutNode, SceneGlass> {
   constructor(options: GlassOptions = {}) {
     super(createNoop(), new SceneGlass(options))
   }

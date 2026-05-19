@@ -4,7 +4,7 @@
 
 `@liquid-dom/layout` is a renderer-agnostic TypeScript layout engine inspired by SwiftUI's two-step layout model: parents propose a size, children report a size, then parents place children into rectangles.
 
-It does not render UI. It gives you retained layout nodes with stable ids, mutable layout properties, measurement caching, and calculated geometry written directly to each node. Your DOM, Canvas, SVG, WebGL, native, or custom renderer owns the visual objects and reads `node.layout`.
+It does not render UI. It gives you mutable layout nodes with stable ids, layout properties, measurement caching, and calculated geometry written directly to each node. Your DOM, Canvas, SVG, WebGL, native, or custom renderer owns the visual objects and reads `node.layout`.
 
 ## Install
 
@@ -58,9 +58,9 @@ engine.dispose()
 
 `layout(proposal)` throws until `root` is assigned. It mutates reachable nodes by writing `node.layout`, then returns debug stats. Set `maxCachedMeasurements: 0` to disable measurement caching while profiling.
 
-### Retained Nodes
+### Layout Nodes
 
-Nodes are retained mutable objects. Builders such as `hstack`, `vstack`, `frame`, `padding`, and `leaf` return node instances with stable generated ids and property setters.
+Nodes are mutable objects. Builders such as `hstack`, `vstack`, `frame`, `padding`, and `leaf` return node instances with stable generated ids and property setters.
 
 ```ts
 const row = hstack({ spacing: 8 })

@@ -2,7 +2,7 @@
 
 ## Description
 
-`@liquid-dom/core` provides the core DOM-backed liquid-glass renderer. It includes an imperative scene graph, a WebGPU renderer that owns a canvas, a reusable WebGPU core for adapters, and a retained layout API under `@liquid-dom/core/layout`.
+`@liquid-dom/core` provides the core DOM-backed liquid-glass renderer. It includes an imperative scene graph, a WebGPU renderer that owns a canvas, a reusable WebGPU core for adapters, and a layout API under `@liquid-dom/core/layout`.
 
 ## Install
 
@@ -96,7 +96,7 @@ Scene children are rendered by `zIndex`, then by entry order. Scene-level `Html`
 
 `Html` nodes wrap live DOM content and are copied into GPU textures before compositing. Common options are:
 
-- `element`: DOM element mounted into the retained host.
+- `element`: DOM element mounted into the layout-owned host.
 - `opacity`: final opacity used when compositing the copied HTML texture.
 - `blur`: GPU blur radius in CSS pixels. `blur <= 0` uses the unfiltered fast path.
 - `zIndex`: scene draw order among sibling scene or glass HTML nodes.
@@ -139,7 +139,7 @@ Scene graph children must match the nearest non-group parent:
 - `Glass` accepts `Html` and `Group` children.
 - `Group` and `StackingContext` can be inserted anywhere, but every nested descendant still has to be valid for the nearest non-group parent.
 
-That means a `Glass` must ultimately be nested under a `Container`; it cannot be nested under another `Glass`. Wrapping nodes in `Group`, `StackingContext`, or retained layout nodes does not make an invalid scene relationship valid. For example, a `Glass` nested under a layout node that is itself nested under a `Glass` is still invalid, because the nearest non-layout glass scene parent only accepts `Html` descendants.
+That means a `Glass` must ultimately be nested under a `Container`; it cannot be nested under another `Glass`. Wrapping nodes in `Group`, `StackingContext`, or layout nodes does not make an invalid scene relationship valid. For example, a `Glass` nested under a layout node that is itself nested under a `Glass` is still invalid, because the nearest non-layout glass scene parent only accepts `Html` descendants.
 
 ### Container Options
 
@@ -188,9 +188,9 @@ renderer.setBackdropMetricsTracking(container, true)
 const metrics = renderer.getBackdropMetrics(container)
 ```
 
-### Retained Layout Subpath
+### Layout Subpath
 
-`@liquid-dom/core/layout` wraps the imperative scene graph in retained layout nodes powered by `@liquid-dom/layout`.
+`@liquid-dom/core/layout` wraps the imperative scene graph in layout nodes powered by `@liquid-dom/layout`.
 
 ```ts
 import {
@@ -203,13 +203,13 @@ import {
 } from '@liquid-dom/core/layout'
 ```
 
-Use this subpath when building a non-React retained UI. `LayoutScene.layout(proposal)` measures and places layout nodes, then synchronizes their scene graph nodes. The React package builds on the same classes.
+Use this subpath when building a non-React layout UI. `LayoutScene.layout(proposal)` measures and places layout nodes, then synchronizes their scene graph nodes. The React package builds on the same classes.
 
-The retained `Html` layout node exposes the same compositing options as scene `Html`, including `opacity`, `blur`, and `zIndex`.
+The `Html` layout node exposes the same compositing options as scene `Html`, including `opacity`, `blur`, and `zIndex`.
 
-Some retained layout nodes accept exactly one direct child: `Frame`, `Padding`, `Transform`, `GlassContainer`, and `Glass`. If you need multiple children inside one of these nodes, put those children inside a multi-child layout node such as `HStack`, `VStack`, or `ZStack`, then use that layout node as the single child.
+Some layout nodes accept exactly one direct child: `Frame`, `Padding`, `Transform`, `GlassContainer`, and `Glass`. If you need multiple children inside one of these nodes, put those children inside a multi-child layout node such as `HStack`, `VStack`, or `ZStack`, then use that layout node as the single child.
 
-Retained `Transform.origin` is a unit point in the measured layout bounds, where `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center. The retained layout node resolves that unit point to the CSS-pixel scene graph origin after measurement.
+`Transform.origin` is a unit point in the measured layout bounds, where `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center. The layout node resolves that unit point to the CSS-pixel scene graph origin after measurement.
 
 The synchronized scene graph still follows the scene node relationship rules above. All nested children have to conform to the parent rules, even when they pass through layout-only nodes.
 

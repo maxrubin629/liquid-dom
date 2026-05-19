@@ -173,7 +173,7 @@ describe('layout UI tree', () => {
     expect(transform.sceneNode.origin).toEqual({ x: 60, y: 30 })
   })
 
-  it('emits layout and frame invalidations from retained node mutations', () => {
+  it('emits layout and frame invalidations from node mutations', () => {
     const scene = new LayoutScene()
     const container = scene.add(new GlassContainer())
     const row = container.add(new HStack())
@@ -211,7 +211,7 @@ describe('layout UI tree', () => {
     expect(glass.cornerSmoothing).toBe(0)
   })
 
-  it('propagates retained glass corner geometry changes and invalidates frames', () => {
+  it('propagates glass corner geometry changes and invalidates frames', () => {
     const scene = new LayoutScene()
     const container = scene.add(new GlassContainer())
     const glass = container.add(new Glass({ cornerRadius: 10, cornerSmoothing: 0.2 }))
@@ -237,7 +237,7 @@ describe('layout UI tree', () => {
     expect(initializedHtml.blur).toBe(4)
   })
 
-  it('propagates retained HTML blur to the scene node and invalidates frames', () => {
+  it('propagates HTML blur to the scene node and invalidates frames', () => {
     const scene = new LayoutScene()
     const html = scene.add(new Html({ blur: 10 }))
     const events: string[] = []

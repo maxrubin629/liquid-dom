@@ -36,7 +36,7 @@ function assignProperty(target: object, property: string, value: unknown) {
 }
 
 /**
- * Synchronizes React props into a retained node, animating properties with a
+ * Synchronizes React props into a node, animating properties with a
  * matching declarative transition and assigning all other values immediately.
  */
 export function useAnimatedProps<Target extends object, Values extends PropValues>(

@@ -135,9 +135,9 @@ export type LiquidCanvasProps = ChildrenProp & RefProp<LiquidCanvasRef> & {
 }
 
 export type LiquidSceneProps = ChildrenProp & RefProp<LiquidSceneRef> & {
-  /** Called when the retained scene needs a new frame without a layout pass. */
+  /** Called when the scene needs a new frame without a layout pass. */
   onInvalidateFrame?: () => void
-  /** Called when the retained scene needs layout before the next frame. */
+  /** Called when the scene needs layout before the next frame. */
   onInvalidateLayout?: () => void
 }
 

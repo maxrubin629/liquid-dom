@@ -71,7 +71,7 @@ export default function SimpleLayoutSceneDemo() {
             <div className="simple-layout-backdrop">
               <div className="simple-layout-copy">
                 <span>React layout scene</span>
-                <strong>Retained UI tree, live glass transforms</strong>
+                <strong>UI tree, live glass transforms</strong>
                 <p>Sharp type, bands, and blocks make the refraction easier to read.</p>
               </div>
               <div className="simple-layout-marquee">
