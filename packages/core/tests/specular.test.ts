@@ -3,8 +3,8 @@ import { Container } from '../src/scene'
 import { resolveSpecularWidthPx } from '../src/renderer'
 
 describe('specular width', () => {
-  it('defaults containers to a DPR-aware hairline', () => {
-    expect(new Container().specularWidth).toBe('hairline')
+  it('defaults containers to a 1px CSS specular width', () => {
+    expect(new Container().specularWidth).toBe(1)
   })
 
   it('resolves hairline to one device pixel at any DPR', () => {

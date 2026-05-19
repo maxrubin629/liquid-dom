@@ -116,6 +116,7 @@ export default function MusicSidebarDemo() {
               specularOpacity={0.3}
               surfaceProfile='concave'
               specularFalloff={2}
+              tint={{ r: 0.15, g: 0.15, b: 0.15, a: 0.7 }}
             >
               <Transform x={SIDEBAR_X}>
                 <Glass cornerRadius={50}>

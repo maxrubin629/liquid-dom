@@ -645,17 +645,17 @@ export class Container implements Transform {
   /** Overall compositing opacity for the container's glass and shadow. */
   opacity = 1
   /** Fusion distance used when blending neighboring shapes in CSS pixels. */
-  spacing = 42.5
+  spacing = 12
   /** Backdrop blur radius in CSS pixels. */
-  blur = 3.75
+  blur = 8
   /** Width of the beveled edge in CSS pixels. */
-  bezelWidth = 13.75
+  bezelWidth = 14
   /** Base glass thickness in CSS pixels. */
   thickness = 90
   /** Scalar applied to the physically-derived displacement amount. */
   displacementFactor = 1
   /** Blur radius applied to the precomputed displacement field in CSS pixels. */
-  displacementBlur = 4
+  displacementBlur = 6
   /**
    * Exponent shaping SDF smooth-union normal gating.
    * Higher values suppress blending longer as boundary normals diverge.
@@ -679,29 +679,29 @@ export class Container implements Transform {
   /** 2D light direction in radians, where 0 points upward in screen space. */
   lightDirection = -Math.PI / 4
   /** Multiplier applied to the white specular term. */
-  specularStrength = 1.4
+  specularStrength = 1
   /** Width of the specular band. Numeric values are CSS pixels; `'hairline'` is one device pixel. */
-  specularWidth: SpecularWidth = 'hairline'
+  specularWidth: SpecularWidth = 1
   /** Amount by which specular strength falls off from the edge to the end of the band. */
-  specularFalloff = 0
+  specularFalloff = 1
   /** Multiplier applied to the opposite-side white specular term. */
-  oppositeSpecularStrength = 1.4
+  oppositeSpecularStrength = 1
   /** Exponent controlling specular falloff. */
   specularSharpness = 2
   /** Final opacity of the white specular contribution. */
-  specularOpacity = 0.15
+  specularOpacity = 0.45
   /** Offset in CSS pixels used when sampling the reflection color. */
   reflectionOffset = 18
   /** RGBA tint color layered over the refracted glass interior. */
-  tint: RgbaColor = { r: 0.15, g: 0.15, b: 0.15, a: 0.7 }
+  tint: RgbaColor = { r: 1, g: 1, b: 1, a: 0.15 }
   /** RGBA color used by the container's drop shadow. Alpha `0` disables shadows. */
-  shadowColor: RgbaColor = { r: 0, g: 0, b: 0, a: 0 }
+  shadowColor: RgbaColor = { r: 0, g: 0, b: 0, a: 0.12 }
   /** Horizontal drop shadow offset in CSS pixels. */
   shadowOffsetX = 0
   /** Vertical drop shadow offset in CSS pixels. */
-  shadowOffsetY = 0
+  shadowOffsetY = 10
   /** Drop shadow blur radius in CSS pixels. */
-  shadowBlur = 0
+  shadowBlur = 24
   /** Drop shadow spread in CSS pixels. Positive values expand the silhouette. */
   shadowSpread = 0
   /** Renders the calculated displacement field instead of the shaded glass. */

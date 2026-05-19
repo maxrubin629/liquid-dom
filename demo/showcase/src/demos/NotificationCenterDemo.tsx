@@ -302,7 +302,7 @@ function NotificationCenterScene() {
             transition={{ opacity: APP_ICON_OPACITY_TRANSITION }}
             blur={8}
             bezelWidth={20}
-            thickness={80}
+            thickness={90}
             displacementBlur={6}
             tint={{ r: 1, g: 1, b: 1, a: 0.1 }}
             shadowColor={{ r: 0, g: 0, b: 0, a: 0.05 }}
@@ -342,7 +342,7 @@ function NotificationCenterScene() {
           dispersion={getPanelDispersion(PANEL_OPEN_Y)}
           blur={0}
           bezelWidth={30}
-          thickness={80}
+          thickness={90}
           displacementBlur={0}
           tint={{ r: 1, g: 1, b: 1, a: 0.1 }}
           shadowColor={{ r: 0, g: 0, b: 0, a: 0.18 }}

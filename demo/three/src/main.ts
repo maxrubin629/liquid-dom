@@ -69,7 +69,7 @@ function createGlassScene() {
     blur: Number(blurControl.value),
     spacing: Number(spacingControl.value),
     bezelWidth: 16,
-    thickness: 80,
+    thickness: 90,
     displacementFactor: 0.9,
     displacementBlur: 8,
     ior: 1.45,

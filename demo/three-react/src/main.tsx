@@ -149,7 +149,7 @@ function ReactGlassScene({ controls }: { controls: ControlsState }) {
           blur={controls.blur}
           spacing={controls.spacing}
           bezelWidth={16}
-          thickness={80}
+          thickness={90}
           displacementFactor={0.9}
           displacementBlur={8}
           ior={1.45}

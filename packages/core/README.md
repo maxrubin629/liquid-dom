@@ -151,7 +151,7 @@ That means a `Glass` must ultimately be nested under a `Container`; it cannot be
 - Specular and reflection: `lightDirection`, `specularStrength`, `specularWidth`, `specularFalloff`, `oppositeSpecularStrength`, `specularSharpness`, `specularOpacity`, `reflectionOffset`
 - Color and shadow: `tint`, `shadowColor`, `shadowOffsetX`, `shadowOffsetY`, `shadowBlur`, `shadowSpread`
 
-`specularWidth` accepts a CSS pixel number or `'hairline'`. The default `'hairline'` resolves to one device pixel at the active DPR.
+`specularWidth` accepts a CSS pixel number or `'hairline'`. Numeric values scale with DPR; `'hairline'` resolves to one device pixel at the active DPR.
 
 ### Glass Pointer Events
 
