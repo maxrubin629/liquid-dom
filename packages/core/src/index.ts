@@ -1,5 +1,4 @@
 export { GlassPointerEvent } from './events'
-export { DEFAULT_CORNER_SMOOTHING } from './corner-smoothing'
 export { Glass, Html, Container, Group, StackingContext, Scene } from './scene'
 export { Renderer, WebGpuGlassCore, WebGpuDomContentSource, resolveSpecularWidthPx } from './renderer'
 export type { GlassPointerEventInit, GlassPointerEventType } from './events'

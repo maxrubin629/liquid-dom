@@ -46,16 +46,29 @@ export function App() {
 
 `LiquidCanvas` owns a liquid scene, a `Renderer`, a canvas, and a frame loop.
 
-Common props:
+`LiquidCanvas` props:
 
-- `className`, `style`: applied to the host element.
-- `canvasClassName`, `canvasStyle`: applied to the generated canvas.
-- `maxDpr`: caps renderer DPR.
-- `proposal`: fixed layout proposal. If omitted, the host element is measured with `ResizeObserver`.
-- `frameloop`: `'always'` or `'demand'`.
-- `onError`: frame-loop error handler.
+| Prop | Description |
+| --- | --- |
+| `children` | Liquid DOM React children. |
+| `ref` | Receives `LiquidCanvasRef`. |
+| `className`, `style` | Applied to the host element. |
+| `canvasClassName`, `canvasStyle` | Applied to the generated canvas. |
+| `maxDpr` | Caps renderer DPR. Defaults to `2`. |
+| `proposal` | Fixed layout proposal. If omitted, the host element is measured with `ResizeObserver`. |
+| `frameloop` | `'always'` or `'demand'`. Defaults to `'always'`. |
+| `onError` | Frame-loop error handler. |
 
 `LiquidScene` is headless. It builds a liquid scene without creating a renderer or canvas. Use its ref from another renderer and call `update(proposal, delta)` before rendering.
+
+`LiquidScene` props are `children`, `ref`, `onInvalidateFrame`, and `onInvalidateLayout`. `onInvalidateFrame` means a frame is needed without layout; `onInvalidateLayout` means layout is dirty before the next frame.
+
+Ref handles:
+
+| Ref | Fields |
+| --- | --- |
+| `LiquidCanvasRef` | `layoutScene`, `scene`, `renderer`, `canvas`, `invalidateLayout()`, `invalidateFrame()` |
+| `LiquidSceneRef` | `layoutScene`, `scene`, `update(proposal, delta?)`, `invalidateLayout()`, `invalidateFrame()` |
 
 ### Layout Components
 
@@ -75,10 +88,18 @@ import {
 
 These components mirror the layout classes from `@liquid-dom/core/layout`.
 
-- `HStack`, `VStack`, and `ZStack` arrange children.
-- `Frame`, `Padding`, and `Spacer` constrain or expand layout.
-- `Background` and `Overlay` add decoration slots that do not affect content size.
-- `Transform` applies scene transforms after layout. Its `origin` is a unit point in the measured layout bounds, where `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center.
+| Component | Props |
+| --- | --- |
+| `HStack`, `VStack` | `children`, `ref`, `spacing`, `alignment`, `transition` |
+| `ZStack` | `children`, `ref`, `alignment`, `transition` |
+| `Frame` | `children`, `ref`, `width`, `height`, `minWidth`, `minHeight`, `idealWidth`, `idealHeight`, `maxWidth`, `maxHeight`, `alignment`, `transition` |
+| `Padding` | `children`, `ref`, `insets`, `transition` |
+| `Background` | `children`, `background`, `ref`, `alignment`, `transition` |
+| `Overlay` | `children`, `overlay`, `ref`, `alignment`, `transition` |
+| `Transform` | `children`, `ref`, `x`, `y`, `scaleX`, `scaleY`, `rotation`, `origin`, `transition` |
+| `Spacer` | `ref`, `minLength`, `transition` |
+
+`HStack`, `VStack`, and `ZStack` arrange children. `Frame`, `Padding`, and `Spacer` constrain or expand layout. `Background` and `Overlay` add decoration slots that do not affect content size. `Transform` applies scene transforms after layout. Its `origin` is a unit point in the measured layout bounds, where `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center.
 
 All layout components expose refs to their nodes and accept a `transition` prop for animatable property changes.
 
@@ -94,6 +115,17 @@ import { Glass, GlassContainer, Html } from '@liquid-dom/react'
 - `Glass` defines one smooth rounded-rectangle glass shape and can opt into pointer events.
 - `Html` renders React children into a DOM element owned by the `Html` node.
 
+`GlassContainer` props:
+
+| Group | Props |
+| --- | --- |
+| Shape and fusion | `spacing`, `normalDivergenceBlendPower`, `normalDivergenceBlendEnabled` |
+| Blur and displacement | `blur`, `bezelWidth`, `displacementFactor`, `displacementBlur`, `debugDisplacement` |
+| Refraction | `thickness`, `ior`, `contentIor`, `contentDepth`, `dispersion`, `surfaceProfile` |
+| Specular and reflection | `lightDirection`, `specularStrength`, `specularWidth`, `specularFalloff`, `oppositeSpecularStrength`, `specularSharpness`, `specularOpacity`, `reflectionOffset` |
+| Color and shadow | `tint`, `shadowColor`, `shadowOffsetX`, `shadowOffsetY`, `shadowBlur`, `shadowSpread` |
+| Compositing and React | `opacity`, `zIndex`, `children`, `ref`, `transition` |
+
 `Glass` shape props include uniform `cornerRadius` and analytic `cornerSmoothing`:
 
 ```tsx
@@ -104,6 +136,8 @@ import { Glass, GlassContainer, Html } from '@liquid-dom/react'
 ```
 
 `cornerSmoothing={0}` produces circular rounded-rectangle corners. Higher values use a fuller p-norm corner curve; the default `0.6` is tuned for an iOS-like squircle. Very constrained corners automatically reduce smoothing back toward a circular shape.
+
+`Glass` props are `children`, `ref`, `cornerRadius`, `cornerSmoothing`, `pointerEvents`, `zIndex`, `onHover`, `onPress`, `onClick`, `onPointerEnter`, `onPointerLeave`, `onPointerMove`, `onPointerDown`, `onPointerUp`, `onPointerCancel`, and `transition`. Pointer handlers receive `GlassPointerEvent`; `onHover` and `onPress` receive booleans.
 
 `Html` supports `sizing="intrinsic"`, `sizing="constrained-width"`, and `sizing="fill"`.
 
@@ -129,6 +163,8 @@ These props are animatable:
 </Html>
 ```
 
+`Html` props are `children`, `ref`, `sizing`, `opacity`, `blur`, `zIndex`, and `transition`.
+
 ### Node Relationship Rules
 
 React components ultimately synchronize into the `@liquid-dom/core` scene graph, so nested children must satisfy the underlying parent rules:
@@ -141,19 +177,6 @@ React components ultimately synchronize into the `@liquid-dom/core` scene graph,
 For example, a `Glass` nested under `Frame` or `Transform` inside another `Glass` is still invalid, because all nested children are checked against the nearest glass scene parent.
 
 ### Hover And Press
-
-`Glass` supports `whileHover` and `whilePress` convenience props. They accept `Glass` props, apply while hovered or pressed, and return to the normal component props afterward.
-
-```tsx
-<Glass
-  cornerRadius={32}
-  transition={{ cornerRadius: spring({ stiffness: 520, damping: 42 }) }}
-  whileHover={{ cornerRadius: 52 }}
-  whilePress={{ cornerRadius: 20 }}
-/>
-```
-
-`whilePress` takes precedence over `whileHover` when both provide the same prop. These props imply `pointerEvents={true}` unless `pointerEvents={false}` is set explicitly.
 
 `onHover` and `onPress` receive the same interaction state as booleans. They are useful when the interaction should drive a parent or sibling component:
 
@@ -232,7 +255,33 @@ When an active easing animation is retargeted, it starts a new easing transition
 
 `timeScale={2}` runs animations twice as fast, and `timeScale={0.5}` runs them at half speed. It applies to declarative `transition` props, `useAnimate()`, and `useTimeline()` calls under the provider. Active animations respond when `timeScale` changes. Invalid or nonpositive values are treated as `1`.
 
-`useAnimate()` starts direct node animations and returns controls with `finished` and `stop()`. `useTimeline()` creates sequential animation timelines. `useFrame()` registers a callback in the nearest `LiquidCanvas` frame loop.
+`AnimationConfigProviderProps` is `{ children?: ReactNode; timeScale?: number }`.
+
+Animation and frame APIs:
+
+| API | Description |
+| --- | --- |
+| `spring(options?)` | Creates a spring transition. Options are `stiffness`, `damping`, `mass`, `velocity`, `restSpeed`, and `restDelta`. |
+| `easing(options?)` | Creates a duration transition. Options are `duration` in seconds and `ease`. |
+| `Easing` | Provides `linear`, `easeIn`, `easeOut`, `easeInOut`, and `bezier(x1, y1, x2, y2)`. |
+| `transition` prop | Accepts a single `AnimationConfig` or a per-property `TransitionMap` with optional `default`. |
+| `useAnimate()` | Starts direct node animations and returns `AnimationControls` with `finished` and `stop()`. |
+| `useTimeline(defaultTransition?)` | Creates an `AnimationTimeline` with `to(target, values, transition?)`, `call(callback)`, `play()`, and `stop()`. |
+| `useFrame(callback, priority?)` | Registers a callback in the nearest `LiquidCanvas` frame loop. |
+| `useInvalidateLayout()` | Returns the nearest root's layout invalidation function. |
+| `useInvalidateFrame()` | Returns the nearest root's frame invalidation function. |
+| `useLiquidScene()` | Returns the nearest `LayoutScene`. |
+| `useRenderer()` | Returns the nearest `Renderer`; only valid under `LiquidCanvas`. |
+
+`FrameState` passed to `useFrame` includes `layoutScene`, `renderer`, `scene`, `canvas`, `time`, `delta`, `invalidateLayout`, and `invalidateFrame`.
+
+Low-level exports include `AnimationManager`, `AnimationTimeline`, `AnimationConfig`, `ComponentTransition`, `TransitionMap`, `SpringTransition`, `EasingTransition`, `EasingFunction`, `AnimationControls`, `AnimateFunction`, and `AnimationTimeScaleRef`.
+
+### Exported Types
+
+Props and refs are exported for all components: `LiquidCanvasProps`, `LiquidCanvasRef`, `LiquidSceneProps`, `LiquidSceneRef`, `HStackProps`, `HStackRef`, `VStackProps`, `VStackRef`, `ZStackProps`, `ZStackRef`, `FrameProps`, `FrameRef`, `PaddingProps`, `PaddingRef`, `BackgroundProps`, `BackgroundRef`, `OverlayProps`, `OverlayRef`, `TransformProps`, `TransformRef`, `GlassContainerProps`, `GlassContainerRef`, `GlassProps`, `GlassRef`, `HtmlProps`, `HtmlRef`, `SpacerProps`, and `SpacerRef`.
+
+Interaction handler types are `GlassPointerHandler` and `GlassStateHandler`. Root and frame-loop types are `FrameCallback` and `FrameLoopMode`.
 
 ## Integration Notes
 

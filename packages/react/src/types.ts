@@ -157,8 +157,6 @@ export type GlassContainerProps = ChildrenProp & RefProp<GlassContainerRef> & Gl
 export type GlassStateHandler = (active: boolean) => void
 export type GlassPointerHandler = (event: GlassPointerEvent) => void
 export type GlassProps = ChildrenProp & RefProp<GlassRef> & GlassOptions & TransitionProp<GlassOptions> & {
-  whileHover?: Partial<GlassOptions>
-  whilePress?: Partial<GlassOptions>
   onHover?: GlassStateHandler
   onPress?: GlassStateHandler
   onClick?: GlassPointerHandler

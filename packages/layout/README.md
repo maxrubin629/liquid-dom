@@ -58,6 +58,17 @@ engine.dispose()
 
 `layout(proposal)` throws until `root` is assigned. It mutates reachable nodes by writing `node.layout`, then returns debug stats. Set `maxCachedMeasurements: 0` to disable measurement caching while profiling.
 
+`createLayoutEngine(options)` accepts `LayoutEngineOptions`:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `root` | `LayoutNode` | Optional initial root. |
+| `onInvalidate` | `(invalidation: LayoutInvalidation) => void` | Called when a node mutation invalidates measurement. |
+| `dev` | `boolean` | Enables development-oriented runtime checks. |
+| `maxCachedMeasurements` | `number` | Maximum measurement cache entries. Use `0` to disable caching. |
+
+`LayoutEngine` exposes `root`, `layout(proposal)`, `getDebugStats()`, and `dispose()`. `LayoutDebugStats` includes `measureCalls`, `cacheHits`, `cacheMisses`, `invalidations`, `activeSubscriptions`, and `nodes`.
+
 ### Layout Nodes
 
 Nodes are mutable objects. Builders such as `hstack`, `vstack`, `frame`, `padding`, and `leaf` return node instances with stable generated ids and property setters.
@@ -78,6 +89,27 @@ Every node exposes:
 - `append`, `prepend`, `insertBefore`, `replaceChildren`, `remove`, and `dispose`
 
 `layout.rect` is relative to the parent layout node. Detached nodes keep their last layout until they are laid out again.
+
+Core geometry and layout types:
+
+| Type | Shape |
+| --- | --- |
+| `ProposedSize` | `{ width?: number; height?: number }` |
+| `Size` | `{ width: number; height: number }` |
+| `Rect` | `{ x: number; y: number; width: number; height: number }` |
+| `NodeLayout` | `{ rect: Rect }` |
+| `Length` | `number \| 'infinity'` |
+| `Insets` | `{ top: number; right: number; bottom: number; left: number }` |
+| `InsetsInput` | `number`, partial edge insets, or `{ horizontal?: number; vertical?: number }` |
+| `ChildInput` | A node, an array of optional nodes, `null`, `false`, or `undefined`. |
+
+Alignment types:
+
+| Type | Values |
+| --- | --- |
+| `Axis` | `'horizontal'`, `'vertical'` |
+| `StackAlignment` | `'start'`, `'center'`, `'end'`, `'leading'`, `'trailing'`, `'top'`, `'bottom'` |
+| `Alignment` | `'center'`, edge/corner strings such as `'topLeading'`, or `{ x?: 'start' \| 'center' \| 'end'; y?: 'start' \| 'center' \| 'end' }` |
 
 ### Leaves
 
@@ -100,6 +132,16 @@ title.invalidateMeasure('manual')
 ```
 
 Use `measureKey`, replace `measure`, or call `invalidateMeasure()` when measurement behavior changes outside a subscription.
+
+`LeafSpec` fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `measure` | `LeafMeasure` | Required measurement callback. |
+| `subscribe` | `LeafSubscribe` | Optional subscription that calls `notify(cause)` when measurement changes. |
+| `measureKey` | `unknown` | Cache identity for measurement behavior. |
+
+`LeafNode` extends `LayoutNode` with `measure`, `subscribe`, `measureKey`, and `invalidateMeasure(cause?)`.
 
 ### Built-In Layouts
 
@@ -128,6 +170,20 @@ import {
 - `background` and `overlay` place decorations in the content bounds without affecting parent layout.
 - `defineLayout` creates custom containers with explicit `measure` and `place` functions.
 
+Built-in option types:
+
+| Builder | Option type | Options | Node properties |
+| --- | --- | --- | --- |
+| `hstack`, `vstack` | `StackOptions` | `spacing?: number`, `alignment?: StackAlignment` | `StackNode.spacing`, `StackNode.alignment` |
+| `zstack` | `ZStackOptions` | `alignment?: Alignment` | `ZStackNode.alignment` |
+| `frame` | `FrameOptions` | `width`, `height`, `minWidth`, `minHeight`, `idealWidth`, `idealHeight`, `maxWidth`, `maxHeight`, `alignment` | Matching `FrameNode` properties |
+| `padding` | `PaddingOptions` | `insets?: InsetsInput` | `PaddingNode.insets` |
+| `background`, `overlay` | `DecorationOptions` | `alignment?: Alignment` | `DecorationNode.alignment` |
+| `spacer` | `SpacerOptions` | `minLength?: number` | `SpacerNode.minLength` |
+| `defineLayout` | `DefineLayoutOptions` | `kind`, `props`, `measure`, `place` | `CustomLayoutNode.props` |
+
+`frame(node, options)` and `padding(node, options)` attach an initial child. Calling them with only options creates an empty node. `noop(child?)` creates a `NoopNode`.
+
 ### Custom Layouts
 
 ```ts
@@ -153,6 +209,8 @@ const flow = defineLayout({
 
 `place` is command-style: call `child.place(...)` directly. `bounds` is in the layout node's own local coordinate space, so direct child placements are parent-local rects.
 
+`LayoutMeasureInput` contains `proposal`, `children`, and `node`. `LayoutPlaceInput` contains `bounds`, `proposal`, `children`, and `node`. Each `LayoutChild` exposes `node`, `id`, `kind`, `isSpacer`, `measure(proposal)`, and `place(bounds, proposal?)`.
+
 ### DOM Helpers
 
 The `@liquid-dom/layout/dom` subpath provides `domLeaf`, `measureDomElement`, and `subscribeDomElement` for HTML element measurement.
@@ -166,7 +224,16 @@ const node = domLeaf({
 })
 ```
 
-`sizing` can be `intrinsic`, `constrained-width`, or `fill`.
+DOM helper API:
+
+| API | Description |
+| --- | --- |
+| `domLeaf({ element, sizing, measureKey })` | Creates a `LeafNode` measured from an `HTMLElement`. |
+| `measureDomElement(element, proposal?, options?)` | Measures an element clone using the selected sizing mode. |
+| `subscribeDomElement(element, notify)` | Subscribes to resize, class/style/content mutation, image load/error, and font-load changes. |
+| `DomLeafSizing` | `'intrinsic'`, `'constrained-width'`, or `'fill'`. |
+| `DomMeasureOptions` | `{ sizing?: DomLeafSizing }` |
+| `DomLeafOptions` | `{ element: HTMLElement; sizing?: DomLeafSizing; measureKey?: unknown }` |
 
 ## Integration Notes
 

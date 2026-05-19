@@ -92,11 +92,24 @@ import {
 
 Scene children are rendered by `zIndex`, then by entry order. Scene-level `Html` below a container becomes backdrop content for that container; scene-level `Html` above a container covers it and becomes backdrop content for later containers.
 
+All transformable scene nodes accept and expose `x`, `y`, `scaleX`, `scaleY`, `rotation`, and `origin`. `x`, `y`, and `origin` are CSS pixels; `rotation` is radians.
+
+Scene graph classes:
+
+| Class | Constructor options | Public API |
+| --- | --- | --- |
+| `Scene` | none | `add(child)` |
+| `Container` | Transform props plus container options below | `add(child)`, `remove()` |
+| `Glass` | Transform props plus `width`, `height`, `cornerRadius`, `cornerSmoothing`, `pointerEvents`, `zIndex` | `add(child)`, `remove()`, typed pointer event listeners |
+| `Html` | Transform props plus `width`, `height`, `opacity`, `blur`, `zIndex`, `element` | `host`, `element`, `setElement(element)`, `remove()` |
+| `Group` | Transform props | `add(child)`, `remove()` |
+| `StackingContext` | Transform props plus `zIndex` | `add(child)`, `remove()`, `zIndex` |
+
 ### Html Options
 
 `Html` nodes wrap live DOM content and are copied into GPU textures before compositing. Common options are:
 
-- `element`: DOM element mounted into the layout-owned host.
+- `element`: DOM element mounted into the `Html.host` element.
 - `opacity`: final opacity used when compositing the copied HTML texture.
 - `blur`: GPU blur radius in CSS pixels. `blur <= 0` uses the unfiltered fast path.
 - `zIndex`: scene draw order among sibling scene or glass HTML nodes.
@@ -143,15 +156,55 @@ That means a `Glass` must ultimately be nested under a `Container`; it cannot be
 
 ### Container Options
 
-`Container` controls the optical behavior for its glass children. The commonly tuned options are:
+`Container` controls the optical behavior for its glass children. Options can be passed to the constructor or mutated as properties:
 
-- Shape and fusion: `spacing`, `normalDivergenceBlendPower`, `normalDivergenceBlendEnabled`
-- Blur and displacement: `blur`, `bezelWidth`, `displacementFactor`, `displacementBlur`, `debugDisplacement`
-- Refraction: `thickness`, `ior`, `contentIor`, `contentDepth`, `dispersion`, `surfaceProfile`
-- Specular and reflection: `lightDirection`, `specularStrength`, `specularWidth`, `specularFalloff`, `oppositeSpecularStrength`, `specularSharpness`, `specularOpacity`, `reflectionOffset`
-- Color and shadow: `tint`, `shadowColor`, `shadowOffsetX`, `shadowOffsetY`, `shadowBlur`, `shadowSpread`
+| Group | Properties |
+| --- | --- |
+| Shape and fusion | `spacing`, `normalDivergenceBlendPower`, `normalDivergenceBlendEnabled` |
+| Blur and displacement | `blur`, `bezelWidth`, `displacementFactor`, `displacementBlur`, `debugDisplacement` |
+| Refraction | `thickness`, `ior`, `contentIor`, `contentDepth`, `dispersion`, `surfaceProfile` |
+| Specular and reflection | `lightDirection`, `specularStrength`, `specularWidth`, `specularFalloff`, `oppositeSpecularStrength`, `specularSharpness`, `specularOpacity`, `reflectionOffset` |
+| Color and shadow | `tint`, `shadowColor`, `shadowOffsetX`, `shadowOffsetY`, `shadowBlur`, `shadowSpread` |
+| Compositing | `opacity`, `zIndex` |
+
+Default values:
+
+| Property | Default |
+| --- | --- |
+| `opacity` | `1` |
+| `spacing` | `12` |
+| `blur` | `8` |
+| `bezelWidth` | `14` |
+| `thickness` | `90` |
+| `displacementFactor` | `1` |
+| `displacementBlur` | `6` |
+| `normalDivergenceBlendPower` | `0.5` |
+| `normalDivergenceBlendEnabled` | `true` |
+| `ior` | `1.5` |
+| `contentIor` | `1` |
+| `contentDepth` | `0` |
+| `dispersion` | `0` |
+| `surfaceProfile` | `'convex'` |
+| `lightDirection` | `-Math.PI / 4` |
+| `specularStrength` | `1` |
+| `specularWidth` | `1` |
+| `specularFalloff` | `1` |
+| `oppositeSpecularStrength` | Matches `specularStrength` when omitted. |
+| `specularSharpness` | `2` |
+| `specularOpacity` | `0.45` |
+| `reflectionOffset` | `18` |
+| `tint` | `{ r: 1, g: 1, b: 1, a: 0.15 }` |
+| `shadowColor` | `{ r: 0, g: 0, b: 0, a: 0.12 }` |
+| `shadowOffsetX` | `0` |
+| `shadowOffsetY` | `10` |
+| `shadowBlur` | `24` |
+| `shadowSpread` | `0` |
+| `debugDisplacement` | `false` |
+| `zIndex` | `0` |
 
 `specularWidth` accepts a CSS pixel number or `'hairline'`. Numeric values scale with DPR; `'hairline'` resolves to one device pixel at the active DPR.
+
+`SurfaceProfile` is `'convex'`, `'concave'`, or `'lip'`. `RgbaColor` channels use normalized `0..1` values.
 
 ### Glass Pointer Events
 
@@ -179,7 +232,7 @@ renderer.render()
 renderer.destroy()
 ```
 
-`Renderer` creates a `<canvas layoutsubtree="true">`. Append `renderer.canvas` to the page, size it with CSS, and call `render()` from your own frame loop. Use `destroy()` to release GPU and DOM resources.
+`Renderer` creates a `<canvas layoutsubtree="true">`. Append `renderer.canvas` to the page, size it with CSS, and call `render()` from your own frame loop. Use `destroy()` to release GPU and DOM resources. Constructor options are `scene?: Scene` and `maxDpr?: number`; `maxDpr` defaults to `2` and is also mutable.
 
 Backdrop metrics can be enabled per container:
 
@@ -187,6 +240,8 @@ Backdrop metrics can be enabled per container:
 renderer.setBackdropMetricsTracking(container, true)
 const metrics = renderer.getBackdropMetrics(container)
 ```
+
+`BackdropMetrics` contains `averageLinearColor`, `averageLuminance`, `luminanceP10`, `luminanceP50`, and `luminanceP90`.
 
 ### Layout Subpath
 
@@ -205,6 +260,24 @@ import {
 
 Use this subpath when building a non-React layout UI. `LayoutScene.layout(proposal)` measures and places layout nodes, then synchronizes their scene graph nodes. The React package builds on the same classes.
 
+Layout subpath public API:
+
+| Class or type | Options/properties |
+| --- | --- |
+| `LayoutScene` | `root`, `scene`, `engine`, `add(child)`, `layout(proposal)`, `getDebugStats()`, `addInvalidationListener(listener)`, `dispose()` |
+| `HStack`, `VStack` | `spacing`, `alignment` |
+| `ZStack` | `alignment` |
+| `Frame` | `width`, `height`, `minWidth`, `minHeight`, `idealWidth`, `idealHeight`, `maxWidth`, `maxHeight`, `alignment` |
+| `Padding` | `insets` |
+| `Background`, `Overlay` | `alignment`, `setContent(child)`, `setDecoration(child)` |
+| `Transform` | `x`, `y`, `scaleX`, `scaleY`, `rotation`, `origin` |
+| `GlassContainer` | Same optical properties as `Container`, except transform props are layout-owned. |
+| `Glass` | `cornerRadius`, `cornerSmoothing`, `pointerEvents`, `zIndex` |
+| `Html` | `sizing`, `opacity`, `blur`, `zIndex`, `element`, `setElement(element)` |
+| `Spacer` | `minLength` |
+
+Every layout UI class exposes `layoutNode`, `sceneNode`, `children`, `add(child)`, and `remove()`, except `Html` and `Spacer` are leaves and reject children.
+
 The `Html` layout node exposes the same compositing options as scene `Html`, including `opacity`, `blur`, and `zIndex`.
 
 Some layout nodes accept exactly one direct child: `Frame`, `Padding`, `Transform`, `GlassContainer`, and `Glass`. If you need multiple children inside one of these nodes, put those children inside a multi-child layout node such as `HStack`, `VStack`, or `ZStack`, then use that layout node as the single child.
@@ -212,6 +285,8 @@ Some layout nodes accept exactly one direct child: `Frame`, `Padding`, `Transfor
 `Transform.origin` is a unit point in the measured layout bounds, where `{ x: 0, y: 0 }` is top-left and `{ x: 0.5, y: 0.5 }` is center. The layout node resolves that unit point to the CSS-pixel scene graph origin after measurement.
 
 The synchronized scene graph still follows the scene node relationship rules above. All nested children have to conform to the parent rules, even when they pass through layout-only nodes.
+
+Exported layout types include `LayoutUiNode`, `LayoutSceneOptions`, `LayoutSceneInvalidationKind`, `LayoutSceneInvalidation`, `LayoutSceneInvalidationListener`, `GlassContainerOptions`, `GlassOptions`, `HtmlOptions`, `TransformOptions`, and `UnitPoint`.
 
 ### WebGPU Core For Adapters
 
@@ -225,7 +300,15 @@ import {
 
 `WebGpuGlassCore` renders a `Scene` into a supplied output `GPUTexture` using an already-created `GPUDevice` and format. It is intended for renderer adapters that already own a WebGPU context.
 
-`WebGpuDomContentSource` copies DOM-backed `Html` content into textures for the core renderer. Adapters can also provide their own `WebGpuGlassContentSource`.
+`WebGpuGlassCore` accepts `{ device, format }`, then exposes `render(options)`, `setBackdropMetricsTracking(container, enabled)`, `getBackdropMetrics(container)`, and `destroy()`. `render(options)` accepts `scene` or pre-flattened `layers`, `width`, `height`, `dpr`, `outputTexture`, optional `backdropTexture`, and optional `contentSource`.
+
+`WebGpuDomContentSource` copies DOM-backed `Html` content into textures for the core renderer. It accepts `targetCanvas`, `getCurrentDpr`, and optional `scene`, then exposes `setDevice(device, format)`, `sync(scene?)`, `getSceneHtmlEntry(html)`, `getGlassContentRange(glass)`, `atlasTexture`, `contentEntriesBindingResource`, and `destroy()`.
+
+Adapters can provide their own `WebGpuGlassContentSource` with optional `atlasTexture`, `contentEntriesBindingResource`, `getSceneHtmlEntry(html)`, and `getGlassContentRange(glass)`. `resolveSpecularWidthPx(specularWidth, dpr)` resolves public specular width semantics into device pixels.
+
+### Exported Types
+
+The root package exports `GlassPointerEvent`, `GlassPointerEventType`, `GlassPointerEventInit`, `Point`, `Transform`, `RgbaColor`, `SpecularWidth`, `SurfaceProfile`, `BackdropMetrics`, `WebGpuGlassCoreInit`, `WebGpuGlassCoreRenderOptions`, `WebGpuDomContentSourceInit`, and `WebGpuGlassContentSource`.
 
 ## Integration Notes
 

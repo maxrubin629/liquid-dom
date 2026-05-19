@@ -33,7 +33,7 @@ type DemoCard = {
 
 const CARDS: DemoCard[] = [
   { id: 'declarative', label: 'transition prop', title: 'Declarative', metric: 'props' },
-  { id: 'states', label: 'whileHover', title: 'Hover state', metric: 'props' },
+  { id: 'states', label: 'pointer events', title: 'Pointer state', metric: 'events' },
   { id: 'timeline', label: 'useTimeline', title: 'Sequence', metric: 'steps' },
 ]
 
@@ -200,9 +200,6 @@ function AnimatedCard({ refNode, card, width, rotation }: AnimatedCardProps) {
       <Glass
         cornerRadius={34}
         pointerEvents
-        transition={{ cornerRadius: FAST_SPRING }}
-        whileHover={{ cornerRadius: 52 }}
-        whilePress={{ cornerRadius: 20 }}
       >
         <Frame
           width={width}

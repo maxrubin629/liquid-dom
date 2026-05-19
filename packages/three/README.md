@@ -96,6 +96,17 @@ Constructor options:
 - `format`: optional output `GPUTextureFormat` override.
 - `contentSource`: optional DOM or custom content source for glass HTML.
 
+Instance API:
+
+| API | Description |
+| --- | --- |
+| `scene` | The default `@liquid-dom/core` scene used by `render()`. |
+| `device` | Three WebGPU backend device. |
+| `format` | Output format override, Three backend preferred format, or `navigator.gpu.getPreferredCanvasFormat()`. |
+| `getGpuTexture(backdrop)` | Resolves a `GPUTexture` from a `GPUTexture`, Three `RenderTarget`, or Three `Texture`. |
+| `render(options)` | Composites liquid glass over a backdrop. |
+| `destroy()` | Releases GPU resources owned by the adapter. |
+
 Render options:
 
 - `backdrop`: `GPUTexture`, Three `RenderTarget`, or Three `Texture` containing the already-rendered background.
@@ -104,6 +115,18 @@ Render options:
 - `outputTexture`: optional output `GPUTexture`. Defaults to the current canvas texture.
 - `width`, `height`: output dimensions in device pixels. Defaults to Three's drawing buffer size.
 - `dpr`: CSS-to-device pixel ratio. Defaults to Three's pixel ratio.
+
+Public types:
+
+| Type | Fields |
+| --- | --- |
+| `ThreeWebGpuBackend` | `isWebGPUBackend`, `device`, `utils.getPreferredCanvasFormat`, `get(object)` |
+| `ThreeWebGpuBackendReady` | `ThreeWebGpuBackend` with `isWebGPUBackend: true` and `device` |
+| `ThreeWebGpuRenderer` | `backend`, `getContext()`, `getDrawingBufferSize(target)`, `getPixelRatio()` |
+| `ThreeWebGpuRenderTargetRenderer` | `ThreeWebGpuRenderer` plus `domElement`, `render(scene, camera)`, `setRenderTarget(target)` |
+| `ThreeWebGpuRendererValidationOptions` | `owner?: string`, `help?: string` |
+| `ThreeGlassRendererInit` | Constructor options listed above. |
+| `ThreeGlassRenderOptions` | Render options listed above. |
 
 ### Validation Helpers
 
@@ -117,6 +140,13 @@ import {
 ```
 
 These helpers validate that a renderer is backed by Three's WebGPU backend and exposes the methods needed by each integration layer. They throw explicit errors with optional `owner` and `help` text.
+
+| Helper | Returns |
+| --- | --- |
+| `requireThreeWebGpuBackend(renderer, options?)` | `ThreeWebGpuBackendReady` |
+| `requireThreeWebGpuRenderer(renderer, options?)` | `ThreeWebGpuRenderer` |
+| `requireThreeWebGpuCanvasContext(renderer, options?)` | `GPUCanvasContext` |
+| `requireThreeWebGpuRenderTargetRenderer(renderer, options?)` | `ThreeWebGpuRenderTargetRenderer` |
 
 ### Backdrop And Output Flow
 

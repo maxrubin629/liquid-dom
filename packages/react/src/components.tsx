@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Background as LayoutBackground,
@@ -290,53 +290,6 @@ export function GlassContainer({
   return renderNodeChildren(useNodeParent(node), children)
 }
 
-function hasInteractionProps(props: Partial<GlassOptions> | undefined) {
-  return Boolean(props && Object.keys(props).length > 0)
-}
-
-function hasOwnProp(props: Partial<GlassOptions> | undefined, key: keyof GlassOptions) {
-  return Boolean(props && Object.prototype.hasOwnProperty.call(props, key))
-}
-
-function getGlassProp(node: LayoutGlass, key: keyof GlassOptions) {
-  return (node as unknown as Record<string, unknown>)[key]
-}
-
-function resolveInteractiveGlassProps(
-  node: LayoutGlass,
-  base: GlassOptions,
-  whileHover: Partial<GlassOptions> | undefined,
-  whilePress: Partial<GlassOptions> | undefined,
-  hovered: boolean,
-  pressed: boolean,
-  baseFallback: Partial<GlassOptions>,
-) {
-  const resolved = { ...base } as Record<string, unknown>
-  const fallback = baseFallback as Record<string, unknown>
-  const keys = new Set<keyof GlassOptions>([
-    ...Object.keys(whileHover ?? {}) as Array<keyof GlassOptions>,
-    ...Object.keys(whilePress ?? {}) as Array<keyof GlassOptions>,
-  ])
-
-  for (const key of keys) {
-    if (!hasOwnProp(baseFallback, key)) {
-      fallback[key] = hasOwnProp(base, key) ? (base as Record<string, unknown>)[key] : getGlassProp(node, key)
-    }
-
-    if (!hasOwnProp(base, key)) {
-      resolved[key] = fallback[key]
-    }
-    if (hovered && hasOwnProp(whileHover, key)) {
-      resolved[key] = (whileHover as Record<string, unknown> | undefined)?.[key]
-    }
-    if (pressed && hasOwnProp(whilePress, key)) {
-      resolved[key] = (whilePress as Record<string, unknown> | undefined)?.[key]
-    }
-  }
-
-  return resolved as GlassOptions
-}
-
 /** Liquid-glass shape component. */
 export function Glass({
   ref,
@@ -355,15 +308,9 @@ export function Glass({
   onPointerUp,
   onPointerCancel,
   transition,
-  whileHover,
-  whilePress,
 }: GlassProps) {
-  const [hovered, setHovered] = useState(false)
-  const [pressed, setPressed] = useState(false)
   const hoveredRef = useRef(false)
   const pressedRef = useRef(false)
-  const baseFallbackRef = useRef<Partial<GlassOptions>>({})
-  const hasInteraction = hasInteractionProps(whileHover) || hasInteractionProps(whilePress)
   const hasPointerHandler = Boolean(
     onClick ||
     onHover ||
@@ -375,7 +322,7 @@ export function Glass({
     onPointerUp ||
     onPointerCancel,
   )
-  const effectivePointerEvents = pointerEvents ?? (hasPointerHandler || hasInteraction)
+  const effectivePointerEvents = pointerEvents ?? hasPointerHandler
   const node = useStableNode(() => new LayoutGlass({
     cornerRadius,
     cornerSmoothing,
@@ -384,13 +331,12 @@ export function Glass({
   }))
   useExposeRef(ref, node)
   useAttachNode(node)
-  const resolvedProps = resolveInteractiveGlassProps(node, {
+  useAnimatedProps(node, {
     cornerRadius,
     cornerSmoothing,
     pointerEvents: effectivePointerEvents,
     zIndex,
-  }, whileHover, whilePress, hovered, pressed, baseFallbackRef.current)
-  useAnimatedProps(node, resolvedProps, transition, { assignUndefined: false })
+  }, transition, { assignUndefined: false })
 
   useEffect(() => {
     const setHoverState = (nextHovered: boolean) => {
@@ -399,7 +345,6 @@ export function Glass({
       }
 
       hoveredRef.current = nextHovered
-      setHovered(nextHovered)
       onHover?.(nextHovered)
     }
 
@@ -409,31 +354,30 @@ export function Glass({
       }
 
       pressedRef.current = nextPressed
-      setPressed(nextPressed)
       onPress?.(nextPressed)
     }
 
     const listeners: Array<[string, GlassPointerHandler | undefined]> = [
       ['click', onClick],
-      ['pointerenter', hasInteraction || onHover || onPointerEnter ? (event) => {
+      ['pointerenter', onHover || onPointerEnter ? (event) => {
         setHoverState(true)
         onPointerEnter?.(event)
       } : undefined],
-      ['pointerleave', hasInteraction || onHover || onPress || onPointerLeave ? (event) => {
+      ['pointerleave', onHover || onPress || onPointerLeave ? (event) => {
         setHoverState(false)
         setPressState(false)
         onPointerLeave?.(event)
       } : undefined],
       ['pointermove', onPointerMove],
-      ['pointerdown', hasInteraction || onPress || onPointerDown ? (event) => {
+      ['pointerdown', onPress || onPointerDown ? (event) => {
         setPressState(true)
         onPointerDown?.(event)
       } : undefined],
-      ['pointerup', hasInteraction || onPress || onPointerUp ? (event) => {
+      ['pointerup', onPress || onPointerUp ? (event) => {
         setPressState(false)
         onPointerUp?.(event)
       } : undefined],
-      ['pointercancel', hasInteraction || onPress || onPointerCancel ? (event) => {
+      ['pointercancel', onPress || onPointerCancel ? (event) => {
         setPressState(false)
         onPointerCancel?.(event)
       } : undefined],
@@ -454,7 +398,6 @@ export function Glass({
     }
   }, [
     node,
-    hasInteraction,
     onClick,
     onHover,
     onPress,

@@ -80,6 +80,15 @@ export function App() {
 - `LiquidGlassR3F.Render` runs inside the R3F canvas and takes over final rendering with a positive frame priority.
 - `LiquidGlassR3F` is also callable as the render component, so `<LiquidGlassR3F />` is equivalent to `<LiquidGlassR3F.Render />`.
 
+Component props:
+
+| Component | Props |
+| --- | --- |
+| `LiquidGlassR3F.Root` | `children`, optional `sceneRootRef` |
+| `LiquidGlassR3F.Scene` | `children` |
+| `LiquidGlassR3F.Render` | `sceneRootRef`, `renderPriority`, `enabled`, `dpr`, `outputTexture`, `renderTarget`, `onError` |
+| `LiquidGlassR3F` | Same props as `LiquidGlassR3F.Render` |
+
 ### Hook API
 
 Use `useLiquidGlassR3F` when you want to own the `LiquidScene` placement yourself.
@@ -128,6 +137,21 @@ function RenderBridge({
 - `onError`: setup or render error handler.
 
 The hook also accepts `sceneRootRef` and `deferUntilSceneRoot`.
+
+Full option reference:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `sceneRootRef` | `RefObject<LiquidSceneRef \| null>` | Ref for the `LiquidScene` to render. Required by `useLiquidGlassR3F`; optional for the component API when used under `Root`. |
+| `deferUntilSceneRoot` | `boolean` | Hook-only option that waits for `sceneRootRef.current` instead of throwing. |
+| `renderPriority` | `number` | Positive R3F frame priority. Defaults to `1`. |
+| `enabled` | `boolean` | Enables or disables the bridge. Defaults to `true`. |
+| `dpr` | `number \| (state) => number` | DPR used by liquid-glass rendering. Invalid values fall back to Three's pixel ratio. |
+| `outputTexture` | `GPUTexture \| null \| undefined \| (state) => GPUTexture \| null \| undefined` | Optional output target. Defaults to the canvas current texture. |
+| `renderTarget` | `LiquidGlassR3FRenderTargetOptions` | Options for the internal Three `RenderTarget`: `colorSpace`, `depthBuffer`, `format`, `samples`, `stencilBuffer`, and `type`. |
+| `onError` | `(error: unknown) => void` | Called for setup or render failures. If omitted, errors are thrown. |
+
+Exported types are `LiquidGlassR3FDpr`, `LiquidGlassR3FOutputTexture`, `LiquidGlassR3FRenderTargetOptions`, `UseLiquidGlassR3FOptions`, `LiquidGlassR3FRootProps`, `LiquidGlassR3FSceneProps`, `LiquidGlassR3FRenderProps`, and `LiquidGlassR3FProps`.
 
 ## Integration Notes
 
